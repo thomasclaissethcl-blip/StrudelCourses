@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Strudel Lab 1.0</title>
+  <meta name="description" content="Module micro learning pour apprendre Strudel par la pratique.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Aller au contenu</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Micro learning musical</p>
+        <h1>Strudel Lab</h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="ghost" id="openGlossary">Glossaire</button>
+        <button class="ghost" id="openWorkshop">Atelier libre</button>
+        <button class="ghost danger" id="resetProgress">Réinitialiser</button>
+      </div>
+    </header>
+
+    <aside class="sidebar" aria-label="Navigation des parcours">
+      <div class="progress-card">
+        <span id="globalProgressLabel">0 % terminé</span>
+        <div class="progress-track" aria-hidden="true"><div id="globalProgressBar"></div></div>
+      </div>
+      <nav id="branchNav"></nav>
+    </aside>
+
+    <main id="main" class="main-panel" tabindex="-1">
+      <section id="view"></section>
+    </main>
+  </div>
+
+  <dialog id="glossaryDialog" class="modal">
+    <div class="modal-header">
+      <h2>Glossaire</h2>
+      <button class="icon-button" id="closeGlossary" aria-label="Fermer">×</button>
+    </div>
+    <label class="field-label" for="glossarySearch">Rechercher un terme</label>
+    <input id="glossarySearch" class="search-field" type="search" placeholder="pattern, cycle, phasing, etc.">
+    <div id="glossaryList" class="glossary-list"></div>
+  </dialog>
+
+  <dialog id="workshopDialog" class="modal wide">
+    <div class="modal-header">
+      <h2>Atelier libre</h2>
+      <button class="icon-button" id="closeWorkshop" aria-label="Fermer">×</button>
+    </div>
+    <p class="muted">Collez un pattern, modifiez-le, puis chargez-le dans le REPL Strudel. L'audio s'exécute dans Strudel, l'application conserve votre code en local.</p>
+    <textarea id="workshopCode" class="code-editor" spellcheck="false">stack(
+  s("bd ~ sd ~"),
+  s("hh*8").gain(.25),
+  note("c3 eb3 g3 bb3").s("sine").slow(8).room(.8).gain(.25)
+).cpm(70)</textarea>
+    <div class="button-row">
+      <button id="copyWorkshopCode">Copier</button>
+      <button id="loadWorkshopCode">Charger dans Strudel</button>
+      <a id="openWorkshopStrudel" class="button-link" target="_blank" rel="noopener">Ouvrir dans un onglet</a>
+    </div>
+    <div id="workshopFrameHolder" class="frame-holder placeholder">
+      <p>Le REPL Strudel sera chargé ici après action sur le bouton.</p>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="lessons.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
