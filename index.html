@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Strudel Lab 1.0</title>
+  <title>Strudel Lab 1.1</title>
   <meta name="description" content="Module micro learning pour apprendre Strudel par la pratique.">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -17,6 +17,7 @@
       </div>
       <div class="topbar-actions">
         <button class="ghost" id="openGlossary">Glossaire</button>
+        <button class="ghost" id="openTechHelp">Aide audio et tempo</button>
         <button class="ghost" id="openWorkshop">Atelier libre</button>
         <button class="ghost danger" id="resetProgress">Réinitialiser</button>
       </div>
@@ -43,6 +44,30 @@
     <label class="field-label" for="glossarySearch">Rechercher un terme</label>
     <input id="glossarySearch" class="search-field" type="search" placeholder="pattern, cycle, phasing, etc.">
     <div id="glossaryList" class="glossary-list"></div>
+  </dialog>
+
+  <dialog id="techHelpDialog" class="modal wide">
+    <div class="modal-header">
+      <h2>Aide audio et tempo</h2>
+      <button class="icon-button" id="closeTechHelp" aria-label="Fermer">×</button>
+    </div>
+    <div class="content-block">
+      <h3>Si vous n’entendez rien</h3>
+      <p>Commencez par la leçon « Tester le moteur audio sans sample ». Si le synthé fonctionne mais pas les batteries, attendez quelques secondes puis relancez la lecture. Les samples peuvent être silencieux au premier passage, car Strudel charge les fichiers audio à la demande.</p>
+      <p>Dans le REPL intégré, il faut lancer la lecture avec le bouton Play de Strudel. Le bouton de ce module charge seulement le code dans l’interface Strudel.</p>
+    </div>
+    <div class="content-block">
+      <h3>Samples</h3>
+      <p>Les samples de base comme bd, sd, hh et cp sont disponibles par défaut. Les breaks externes comme breaks125 nécessitent une ligne de chargement, par exemple samples('github:tidalcycles/dirt-samples').</p>
+    </div>
+    <div class="content-block">
+      <h3>Tempo</h3>
+      <p>Strudel utilise des cycles par minute. Dans ce module, quand un cycle correspond à quatre temps, un tempo de 120 BPM s’écrit setcpm(120/4). Écrire setcpm(120) avec quatre temps dans le cycle donne une sensation quatre fois trop rapide.</p>
+    </div>
+    <pre class="pre-code">setcpm(120/4)
+// 120 BPM perçu, 4 temps par cycle
+
+s("bd ~ sd ~").bank("RolandTR808")</pre>
   </dialog>
 
   <dialog id="workshopDialog" class="modal wide">

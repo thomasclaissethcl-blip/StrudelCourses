@@ -2,10 +2,16 @@ window.COURSE = {
   "meta": {
     "id": "strudel-lab",
     "title": "Strudel Lab",
-    "version": "1.0",
+    "version": "1.1",
     "language": "fr",
-    "description": "Module micro learning pour apprendre Strudel par la pratique, du tronc commun aux parcours ambient, beat, glitch et IDM.",
-    "strudelIntegration": "Le module charge les patterns dans le REPL Strudel via une URL longue. Le code reste lisible et copiable dans l'application."
+    "description": "Module micro learning pour apprendre Strudel par la pratique, avec tempo corrigé, aide audio, progression locale et parcours stylistiques complets.",
+    "strudelIntegration": "Le module ouvre les patterns dans le REPL Strudel via une URL longue. Les exemples utilisent setcpm(bpm/4) quand un cycle représente quatre temps.",
+    "technicalWarnings": [
+      "Les samples par défaut bd, sd, hh et cp existent dans Strudel, mais les fichiers audio sont chargés à la demande. Le premier déclenchement peut donc être silencieux.",
+      "Pour les breaks de la banque Dirt, le code doit déclarer samples('github:tidalcycles/dirt-samples') avant d'appeler breaks125 ou breaks165.",
+      "Strudel raisonne en cycles. Pour obtenir un ressenti BPM sur un cycle de quatre temps, utiliser setcpm(BPM/4).",
+      "Le bouton Charger dans Strudel ouvre le REPL intégré. Il faut ensuite lancer la lecture dans Strudel, ou ouvrir le code dans un onglet complet."
+    ]
   },
   "branches": [
     {
@@ -16,13 +22,71 @@ window.COURSE = {
       "finalProject": "Créer un premier live set simple avec rythme, nappe et variation.",
       "chapters": [
         {
+          "id": "tc_00",
+          "title": "Démarrage audio et tempo",
+          "learningGoal": "Vérifier que le son fonctionne et comprendre la convention BPM utilisée dans le module.",
+          "lessons": [
+            {
+              "id": "tc_00_01",
+              "title": "Tester le moteur audio sans sample",
+              "concepts": [
+                "synthèse",
+                "audio",
+                "lecture"
+              ],
+              "exerciseType": "modifier_code",
+              "estimatedDuration": "3 à 5 min",
+              "learningGoal": "Vérifier que le REPL Strudel produit bien du son avec un synthé, sans dépendre du chargement de samples.",
+              "concept": "Avant les samples, on teste un son synthétique. Un synthé comme sine ne dépend pas du chargement d’un fichier audio, donc il sert de test technique fiable.",
+              "starterCode": "setcpm(60/4)\n// 60 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,e3,g3]\").s(\"sine\").attack(.2).release(1.5).gain(.35)",
+              "task": "Lancez le code dans Strudel. Remplacez sine par triangle, puis écoutez la différence.",
+              "hintLevel1": "Le nom du son est placé dans .s(\"...\").",
+              "hintLevel2": "Utilisez .s(\"triangle\") sans modifier les notes ni le tempo.",
+              "solution": "setcpm(60/4)\n// 60 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,e3,g3]\").s(\"triangle\").attack(.2).release(1.5).gain(.35)",
+              "whatToListenFor": "Vous devez entendre un accord doux toutes les quatre pulsations perçues. Si vous entendez ce son, le moteur audio fonctionne.",
+              "commonMistake": "Ne commencez pas par un break ou une banque externe pour tester l’audio. Un synthé simple isole mieux les problèmes de lecture.",
+              "summary": "Vous savez vérifier que Strudel produit du son avant d’utiliser les samples.",
+              "tempoNote": "Le module utilise setcpm(BPM/4) quand un cycle représente quatre temps.",
+              "sourceRefs": [
+                "docs_synths",
+                "docs_cycles"
+              ]
+            },
+            {
+              "id": "tc_00_02",
+              "title": "Comprendre BPM et cycles",
+              "concepts": [
+                "setcpm",
+                "cycle",
+                "bpm"
+              ],
+              "exerciseType": "comparer_patterns",
+              "estimatedDuration": "5 à 8 min",
+              "learningGoal": "Comprendre pourquoi un code à 120 BPM s’écrit souvent setcpm(120/4) dans ce module.",
+              "concept": "Strudel ne raisonne pas d’abord en mesures comme un séquenceur classique. Il raisonne en cycles. Si nous décidons qu’un cycle contient quatre temps, alors 120 BPM perçus correspondent à setcpm(120/4).",
+              "starterCode": "setcpm(120/4)\n// 120 BPM perçu, 4 temps par cycle\n\ns(\"bd bd bd bd\").bank(\"RolandTR808\")",
+              "task": "Remplacez bd bd bd bd par bd ~ sd ~, puis écoutez le changement de sensation sans changer setcpm.",
+              "hintLevel1": "Ne touchez pas à setcpm. Modifiez uniquement le contenu de s(\"...\").",
+              "hintLevel2": "Utilisez s(\"bd ~ sd ~\").bank(\"RolandTR808\").",
+              "solution": "setcpm(120/4)\n// 120 BPM perçu, 4 temps par cycle\n\ns(\"bd ~ sd ~\").bank(\"RolandTR808\")",
+              "whatToListenFor": "Le tempo global reste identique, mais la sensation rythmique devient plus espacée.",
+              "commonMistake": "Écrire setcpm(120) avec quatre événements par cycle donne un résultat quatre fois trop rapide pour une lecture en mesure de quatre temps.",
+              "summary": "Pour ce module, la règle pratique est BPM divisé par nombre de temps perçus dans le cycle.",
+              "tempoNote": "Formule utilisée ici : setcpm(bpm / 4).",
+              "sourceRefs": [
+                "docs_cycles"
+              ]
+            }
+          ]
+        },
+        {
           "id": "tc_01",
           "title": "Premiers sons",
           "learningGoal": "Produire et modifier ses premiers samples.",
           "lessons": [
             {
               "id": "tc_01_01",
-              "title": "Jouer un sample",
+              "title": "Jouer et remplacer un sample",
               "concepts": [
                 "sample",
                 "fonction s",
@@ -30,16 +94,21 @@ window.COURSE = {
               ],
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
-              "learningGoal": "Remplacez la grosse caisse par une caisse claire, puis écoutez la différence.",
-              "concept": "Cet exercice travaille sample, fonction s, événement. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"bd\")",
-              "task": "Remplacez la grosse caisse par une caisse claire, puis écoutez la différence.",
-              "hintLevel1": "Le nom du sample se place entre les guillemets.",
-              "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"sd\")",
-              "whatToListenFor": "Vous devez entendre un seul son par cycle.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Vous savez déclencher un sample par son nom."
+              "learningGoal": "Déclencher un sample de batterie, puis remplacer la grosse caisse par une caisse claire.",
+              "concept": "Dans Strudel, s(\"...\") joue des samples. Les noms bd, sd, hh et cp sont des abréviations courantes pour grosse caisse, caisse claire, charley fermé et clap. Les samples par défaut existent déjà, mais ils sont chargés à la demande, ce qui peut rendre le premier déclenchement silencieux.",
+              "starterCode": "setcpm(100/4)\n// 100 BPM perçu, 4 temps par cycle\n\ns(\"bd*4\").bank(\"RolandTR808\")",
+              "task": "Remplacez la grosse caisse par une caisse claire, sans changer le tempo ni la banque de sons.",
+              "hintLevel1": "Le nom du sample est bd. Remplacez uniquement ce nom.",
+              "hintLevel2": "La caisse claire s’écrit sd. Conservez *4 pour entendre le son plusieurs fois.",
+              "solution": "setcpm(100/4)\n// 100 BPM perçu, 4 temps par cycle\n\ns(\"sd*4\").bank(\"RolandTR808\")",
+              "whatToListenFor": "Vous devez entendre quatre frappes régulières. Si rien ne sort au premier lancement, relancez après quelques secondes, car le sample peut être en cours de chargement.",
+              "commonMistake": "Ne supprimez pas *4. Sans répétition, un seul événement peut être plus difficile à percevoir, surtout pendant le chargement initial des samples.",
+              "summary": "Vous savez déclencher un sample et remplacer son nom sans modifier la structure du pattern.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_01_02",
@@ -51,15 +120,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Transformez le motif pour jouer une grosse caisse puis une caisse claire.",
-              "concept": "Cet exercice travaille séquence, cycle. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"bd\")",
+              "concept": "Une chaîne entre guillemets décrit la succession des événements dans un cycle. Ici, quatre positions forment une mesure simple à quatre temps.",
+              "starterCode": "setcpm(90/4)\n// 90 BPM perçu, 4 temps par cycle\n\ns(\"bd bd bd bd\").bank(\"RolandTR808\")",
               "task": "Transformez le motif pour jouer une grosse caisse puis une caisse claire.",
               "hintLevel1": "Ajoutez le deuxième nom de sample dans les mêmes guillemets.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"bd sd\")",
-              "whatToListenFor": "Deux événements doivent être répartis dans le cycle.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une chaîne de samples décrit une séquence."
+              "solution": "setcpm(90/4)\n// 90 BPM perçu, 4 temps par cycle\n\ns(\"bd sd bd sd\").bank(\"RolandTR808\")",
+              "whatToListenFor": "Vous devez entendre une alternance grosse caisse, caisse claire, grosse caisse, caisse claire.",
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une chaîne de samples décrit une séquence.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_01_03",
@@ -72,15 +146,20 @@ window.COURSE = {
               "exerciseType": "completer_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez un silence entre les sons pour faire respirer le motif.",
-              "concept": "Cet exercice travaille silence, tilde, rythme. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"bd sd\")",
+              "concept": "Le symbole ~ crée un silence. Il occupe une position dans le cycle, exactement comme un son.",
+              "starterCode": "setcpm(90/4)\n// 90 BPM perçu, 4 temps par cycle\n\ns(\"bd sd bd sd\").bank(\"RolandTR808\")",
               "task": "Ajoutez un silence entre les sons pour faire respirer le motif.",
               "hintLevel1": "Le symbole ~ indique un silence.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"bd ~ sd ~\")",
-              "whatToListenFor": "Le motif doit être moins serré et plus lisible.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Le silence occupe une place musicale dans le cycle."
+              "solution": "setcpm(90/4)\n// 90 BPM perçu, 4 temps par cycle\n\ns(\"bd ~ sd ~\").bank(\"RolandTR808\")",
+              "whatToListenFor": "Le motif doit respirer davantage. La caisse claire tombe moins vite après la grosse caisse.",
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Le silence occupe une place musicale dans le cycle.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -99,15 +178,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez deux sons et observez si la boucle devient plus longue ou plus dense.",
-              "concept": "Cet exercice travaille cycle, répartition. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"bd sd\")",
+              "concept": "Un cycle est une unité de temps. Si vous mettez quatre événements dans un cycle, Strudel les répartit dans cette durée. Avec setcpm(100/4), le cycle représente une mesure de quatre temps à 100 BPM perçus.",
+              "starterCode": "setcpm(100/4)\n// 100 BPM perçu, 4 temps par cycle\n\ns(\"bd sd\").bank(\"RolandTR808\")",
               "task": "Ajoutez deux sons et observez si la boucle devient plus longue ou plus dense.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"bd sd cp hh\")",
+              "solution": "setcpm(100/4)\n// 100 BPM perçu, 4 temps par cycle\n\ns(\"bd sd cp hh\").bank(\"RolandTR808\")",
               "whatToListenFor": "La boucle garde son cadre temporel, mais contient plus d'événements.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Strudel répartit les événements dans un cycle."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Strudel répartit les événements dans un cycle.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_02_02",
@@ -119,15 +203,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ralentissez le motif pour qu'il s'étale sur deux cycles.",
-              "concept": "Cet exercice travaille slow, temps. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"bd sd cp hh\")",
+              "concept": ".slow(2) étire le pattern sur deux cycles. Le tempo global ne change pas, mais ce motif occupe plus de temps.",
+              "starterCode": "setcpm(100/4)\n// 100 BPM perçu, 4 temps par cycle\n\ns(\"bd sd cp hh\").bank(\"RolandTR808\")",
               "task": "Ralentissez le motif pour qu'il s'étale sur deux cycles.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"bd sd cp hh\").slow(2)",
+              "solution": "setcpm(100/4)\n// 100 BPM perçu, 4 temps par cycle\n\ns(\"bd sd cp hh\").bank(\"RolandTR808\").slow(2)",
               "whatToListenFor": "Le motif complet met plus de temps à revenir.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "slow transforme la durée du pattern."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "slow transforme la durée du pattern.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_02_03",
@@ -139,15 +228,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Faites jouer le charley quatre fois plus vite.",
-              "concept": "Cet exercice travaille fast, densité. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"hh\")",
+              "concept": ".fast() ou * augmente la densité d’un motif dans le cycle. Ici, le charley devient un repère de subdivision.",
+              "starterCode": "setcpm(100/4)\n// 100 BPM perçu, 4 temps par cycle\n\ns(\"hh\").bank(\"RolandTR808\")",
               "task": "Faites jouer le charley quatre fois plus vite.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"hh\").fast(4)",
+              "solution": "setcpm(100/4)\n// 100 BPM perçu, 4 temps par cycle\n\ns(\"hh*8\").bank(\"RolandTR808\").gain(.25)",
               "whatToListenFor": "Le charley doit devenir une pulsation rapide.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "fast augmente la densité temporelle."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "fast augmente la densité temporelle.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_02_04",
@@ -159,15 +253,20 @@ window.COURSE = {
               "exerciseType": "completer_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Réécrivez le motif pour jouer huit hats par cycle.",
-              "concept": "Cet exercice travaille répétition, multiplication. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"hh\")",
+              "concept": "Cette leçon fait travailler répétition, multiplication. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\ns(\"hh\")",
               "task": "Réécrivez le motif pour jouer huit hats par cycle.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"hh*8\")",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\ns(\"hh*8\")",
               "whatToListenFor": "Vous devez entendre huit hats réguliers.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "L'étoile compacte les répétitions dans la mini-notation."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "L'étoile compacte les répétitions dans la mini-notation.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -186,15 +285,20 @@ window.COURSE = {
               "exerciseType": "lire_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez le pattern et repérez les deux couches simultanées.",
-              "concept": "Cet exercice travaille superposition, couches. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"bd ~ sd ~, hh*8\")",
+              "concept": "Cette leçon fait travailler superposition, couches. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\ns(\"bd ~ sd ~, hh*8\")",
               "task": "Écoutez le pattern et repérez les deux couches simultanées.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"bd ~ sd ~, hh*8\")",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\ns(\"bd ~ sd ~, hh*8\")",
               "whatToListenFor": "Kick et snare doivent coexister avec une couche de hats.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "La virgule permet une superposition dans une même chaîne."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "La virgule permet une superposition dans une même chaîne.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_03_02",
@@ -206,15 +310,20 @@ window.COURSE = {
               "exerciseType": "completer_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une couche de clap discrète.",
-              "concept": "Cet exercice travaille stack, arrangement. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd ~ sd ~\"),\n  s(\"hh*8\")\n)",
+              "concept": "Cette leçon fait travailler stack, arrangement. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ sd ~\").bank(\"RolandTR808\"),\n  s(\"hh*8\").bank(\"RolandTR808\").gain(.25)\n)",
               "task": "Ajoutez une couche de clap discrète.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd ~ sd ~\"),\n  s(\"hh*8\").gain(.25),\n  s(\"~ cp ~ cp\").gain(.3)\n)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ sd ~\").bank(\"RolandTR808\").gain(.75),\n  s(\"hh*8\").bank(\"RolandTR808\").gain(.25)\n)",
               "whatToListenFor": "Le clap doit renforcer la boucle sans la dominer.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "stack rend les arrangements plus lisibles."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "stack rend les arrangements plus lisibles.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_03_03",
@@ -226,15 +335,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Baissez les hats pour qu'ils soutiennent le beat.",
-              "concept": "Cet exercice travaille gain, mixage. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd ~ sd ~\").gain(.7),\n  s(\"hh*8\").gain(.8)\n)",
+              "concept": "Cette leçon fait travailler gain, mixage. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ sd ~\").gain(.7),\n  s(\"hh*8\").gain(.8)\n)",
               "task": "Baissez les hats pour qu'ils soutiennent le beat.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd ~ sd ~\").gain(.7),\n  s(\"hh*8\").gain(.25)\n)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ sd ~\").gain(.7),\n  s(\"hh*8\").gain(.25)\n)",
               "whatToListenFor": "Les hats doivent rester en arrière-plan.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Le mixage commence par le réglage de gain."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Le mixage commence par le réglage de gain.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -254,15 +368,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une quatrième note pour créer une couleur plus ouverte.",
-              "concept": "Cet exercice travaille note, hauteur, octave. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 e3 g3\")",
+              "concept": "note(\"...\") joue des hauteurs. c3, e3 et g3 sont des noms de notes avec octave. En remplaçant e par eb, vous changez la couleur harmonique.",
+              "starterCode": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"c3 e3 g3 c4\").s(\"triangle\")",
               "task": "Ajoutez une quatrième note pour créer une couleur plus ouverte.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 e3 g3 bb3\")",
+              "solution": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"c3 eb3 g3 c4\").s(\"triangle\")",
               "whatToListenFor": "Vous devez entendre des hauteurs musicales, pas des percussions.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "note sert à programmer des hauteurs."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "note sert à programmer des hauteurs.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_04_02",
@@ -275,15 +394,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Remplacez sine par sawtooth et comparez le timbre.",
-              "concept": "Cet exercice travaille sine, triangle, sawtooth. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 e3 g3\").s(\"sine\")",
+              "concept": "Cette leçon fait travailler sine, triangle, sawtooth. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nnote(\"c3 e3 g3\").s(\"sine\")",
               "task": "Remplacez sine par sawtooth et comparez le timbre.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 e3 g3\").s(\"sawtooth\")",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nnote(\"c3 e3 g3\").s(\"sawtooth\")",
               "whatToListenFor": "sawtooth doit être plus brillant que sine.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Le timbre change la matière sans changer les notes."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Le timbre change la matière sans changer les notes.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_04_03",
@@ -296,15 +420,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Rendez les notes plus progressives et plus longues.",
-              "concept": "Cet exercice travaille attack, release, enveloppe. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 e3 g3\").s(\"sine\")",
+              "concept": "Les crochets avec des virgules jouent plusieurs notes en même temps. attack adoucit l’entrée du son et release prolonge sa disparition.",
+              "starterCode": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,e3,g3]\").s(\"sine\")",
               "task": "Rendez les notes plus progressives et plus longues.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 e3 g3\").s(\"sine\").attack(1).release(3)",
+              "solution": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,e3,g3]\").s(\"sine\").attack(1).release(3).gain(.35)",
               "whatToListenFor": "Le son doit entrer doucement et se prolonger.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "L'enveloppe définit l'apparition et la disparition du son."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "L'enveloppe définit l'apparition et la disparition du son.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -323,15 +452,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une sensation d'espace au son.",
-              "concept": "Cet exercice travaille room, espace. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 e3 g3\").s(\"sine\").gain(.3)",
+              "concept": "Cette leçon fait travailler room, espace. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nnote(\"c3 e3 g3\").s(\"sine\").gain(.3)",
               "task": "Ajoutez une sensation d'espace au son.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 e3 g3\").s(\"sine\").room(.7).gain(.3)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nnote(\"c3 e3 g3\").s(\"sine\").room(.7).gain(.3)",
               "whatToListenFor": "Le son doit paraître plus large.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "room ajoute une réverbération."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "room ajoute une réverbération.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_05_02",
@@ -343,15 +477,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez un écho modéré à la phrase.",
-              "concept": "Cet exercice travaille delay, écho. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c4 e4 g4\").s(\"triangle\").gain(.25)",
+              "concept": "Cette leçon fait travailler delay, écho. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nnote(\"c4 e4 g4\").s(\"triangle\").gain(.25)",
               "task": "Ajoutez un écho modéré à la phrase.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c4 e4 g4\").s(\"triangle\").delay(.25).delaytime(.5).gain(.25)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nnote(\"c4 e4 g4\").s(\"triangle\").delay(.25).delaytime(.5).gain(.25)",
               "whatToListenFor": "Vous devez entendre des répétitions après les notes.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Le delay crée du mouvement à partir d'une phrase simple."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Le delay crée du mouvement à partir d'une phrase simple.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_05_03",
@@ -364,15 +503,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez un filtre passe-bas pour adoucir le son.",
-              "concept": "Cet exercice travaille lpf, cutoff, filtre. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c2 c3 c4\").s(\"sawtooth\").gain(.25)",
+              "concept": "Cette leçon fait travailler lpf, cutoff, filtre. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nnote(\"c2 c3 c4\").s(\"sawtooth\").gain(.25)",
               "task": "Ajoutez un filtre passe-bas pour adoucir le son.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c2 c3 c4\").s(\"sawtooth\").lpf(800).gain(.25)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nnote(\"c2 c3 c4\").s(\"sawtooth\").lpf(800).gain(.25)",
               "whatToListenFor": "Le son doit devenir moins brillant.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "lpf sculpte un timbre en retirant des aigus."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "lpf sculpte un timbre en retirant des aigus.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -391,15 +535,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez comment trois frappes et quatre frappes cohabitent.",
-              "concept": "Cet exercice travaille polyrythmie, euclid. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd(3,8)\"),\n  s(\"hh(4,8)\").gain(.3)\n)",
+              "concept": "Cette leçon fait travailler polyrythmie, euclid. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd(3,8)\"),\n  s(\"hh(4,8)\").gain(.3)\n)",
               "task": "Écoutez comment trois frappes et quatre frappes cohabitent.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd(3,8)\").gain(.7),\n  s(\"hh(4,8)\").gain(.25)\n)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd(3,8)\").gain(.7),\n  s(\"hh(4,8)\").gain(.25)\n)",
               "whatToListenFor": "Les couches ne découpent pas le temps de la même manière.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "La polyrythmie fait coexister plusieurs découpes du temps."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "La polyrythmie fait coexister plusieurs découpes du temps.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_06_02",
@@ -411,15 +560,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Décalez la couche de hats avec une rotation.",
-              "concept": "Cet exercice travaille rotation, décalage. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd(3,8)\"),\n  s(\"hh(4,8)\").gain(.3)\n)",
+              "concept": "Cette leçon fait travailler rotation, décalage. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd(3,8)\"),\n  s(\"hh(4,8)\").gain(.3)\n)",
               "task": "Décalez la couche de hats avec une rotation.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd(3,8)\").gain(.7),\n  s(\"hh(4,8,1)\").gain(.25)\n)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd(3,8)\").gain(.7),\n  s(\"hh(4,8,1)\").gain(.25)\n)",
               "whatToListenFor": "Le groove doit se déplacer sans changer la densité.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "La rotation déplace le point de départ d'une répartition."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "La rotation déplace le point de départ d'une répartition.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_06_03",
@@ -431,15 +585,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez comment deux boucles de longueur différente se réalignent.",
-              "concept": "Cet exercice travaille polymétrie, réalignement. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd ~ sd\").slow(3),\n  s(\"hh ~ hh ~\").slow(4).gain(.3)\n)",
+              "concept": "Cette leçon fait travailler polymétrie, réalignement. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ sd\").slow(3),\n  s(\"hh ~ hh ~\").slow(4).gain(.3)\n)",
               "task": "Écoutez comment deux boucles de longueur différente se réalignent.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd ~ sd\").slow(3).gain(.7),\n  s(\"hh ~ hh ~\").slow(4).gain(.25)\n)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ sd\").slow(3).gain(.7),\n  s(\"hh ~ hh ~\").slow(4).gain(.25)\n)",
               "whatToListenFor": "Les appuis se déplacent progressivement.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "La polymétrie superpose des longueurs de phrase différentes."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "La polymétrie superpose des longueurs de phrase différentes.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -458,15 +617,20 @@ window.COURSE = {
               "exerciseType": "composer_contraintes",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Préparez une boucle stable de deux ou trois couches.",
-              "concept": "Cet exercice travaille état, stabilité. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd ~ sd ~\"),\n  s(\"hh*8\").gain(.25)\n)",
+              "concept": "Cette leçon fait travailler état, stabilité. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ sd ~\"),\n  s(\"hh*8\").gain(.25)\n)",
               "task": "Préparez une boucle stable de deux ou trois couches.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd ~ sd ~\").gain(.7),\n  s(\"hh*8\").gain(.25),\n  note(\"c3 eb3 g3\").s(\"sine\").slow(4).gain(.2)\n)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ sd ~\").gain(.7),\n  s(\"hh*8\").gain(.25),\n  note(\"c3 eb3 g3\").s(\"sine\").slow(4).gain(.2)\n)",
               "whatToListenFor": "La boucle doit pouvoir tourner longtemps sans fatiguer.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Un live set commence par un état stable."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Un live set commence par un état stable.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_07_02",
@@ -478,15 +642,20 @@ window.COURSE = {
               "exerciseType": "composer_contraintes",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une couche sans remplacer tout le motif.",
-              "concept": "Cet exercice travaille densification, couche. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd ~ sd ~\"),\n  s(\"hh*8\").gain(.25),\n  note(\"c3 e3 g3\").s(\"sine\").slow(4).gain(.3)\n)",
+              "concept": "Cette leçon fait travailler densification, couche. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ sd ~\"),\n  s(\"hh*8\").gain(.25),\n  note(\"c3 e3 g3\").s(\"sine\").slow(4).gain(.3)\n)",
               "task": "Ajoutez une couche sans remplacer tout le motif.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd ~ sd ~\").gain(.7),\n  s(\"hh*8\").gain(.25),\n  s(\"~ cp ~ cp\").gain(.25),\n  note(\"c3 e3 g3\").s(\"sine\").slow(4).room(.5).gain(.25)\n)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ sd ~\").gain(.7),\n  s(\"hh*8\").gain(.25),\n  s(\"~ cp ~ cp\").gain(.25),\n  note(\"c3 e3 g3\").s(\"sine\").slow(4).room(.5).gain(.25)\n)",
               "whatToListenFor": "Le développement doit rester relié à l'état initial.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Développer signifie transformer un état, pas repartir de zéro."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Développer signifie transformer un état, pas repartir de zéro.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "tc_07_03",
@@ -498,15 +667,20 @@ window.COURSE = {
               "exerciseType": "mini_performance",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Préparez une variation plus instable pour un court passage.",
-              "concept": "Cet exercice travaille variation, performance. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd ~ sd ~\"),\n  s(\"hh*8\").gain(.25).degradeBy(.2),\n  note(\"c3 e3 g3\").s(\"sine\").slow(4).room(.6).gain(.3)\n)",
+              "concept": "Cette leçon fait travailler variation, performance. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ sd ~\"),\n  s(\"hh*8\").gain(.25).degradeBy(.2),\n  note(\"c3 e3 g3\").s(\"sine\").slow(4).room(.6).gain(.3)\n)",
               "task": "Préparez une variation plus instable pour un court passage.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd ~ sd ~\").gain(.7),\n  s(\"hh*16\").gain(.18).degradeBy(.35),\n  note(\"c3 e3 g3\").s(\"sine\").slow(4).room(.6).gain(.3)\n)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ sd ~\").gain(.7),\n  s(\"hh*16\").gain(.18).degradeBy(.35),\n  note(\"c3 e3 g3\").s(\"sine\").slow(4).room(.6).gain(.3)\n)",
               "whatToListenFor": "La variation doit apporter du mouvement sans perdre la base.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une performance alterne stabilité et variation."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une performance alterne stabilité et variation.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         }
@@ -534,15 +708,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Retirez aléatoirement une partie des hats.",
-              "concept": "Cet exercice travaille degradeBy, probabilité. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"hh*16\").gain(.2)",
+              "concept": "Cette leçon fait travailler degradeBy, probabilité. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(84/4)\n// 84 BPM perçu, 4 temps par cycle\n\ns(\"hh*16\").gain(.2)",
               "task": "Retirez aléatoirement une partie des hats.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"hh*16\").gain(.2).degradeBy(.3)",
+              "solution": "setcpm(84/4)\n// 84 BPM perçu, 4 temps par cycle\n\ns(\"hh*16\").gain(.2).degradeBy(.3)",
               "whatToListenFor": "Les hats doivent rester présents, mais moins mécaniques.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Le hasard devient musical quand son intensité est dosée."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Le hasard devient musical quand son intensité est dosée.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "gen_01_02",
@@ -554,15 +733,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Faites parfois jouer les hats plus lentement.",
-              "concept": "Cet exercice travaille sometimes, transformation. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"hh*16\").gain(.18)",
+              "concept": "Cette leçon fait travailler sometimes, transformation. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(84/4)\n// 84 BPM perçu, 4 temps par cycle\n\ns(\"hh*16\").gain(.18)",
               "task": "Faites parfois jouer les hats plus lentement.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"hh*16\").gain(.18).sometimes(x => x.speed(\".5\"))",
+              "solution": "setcpm(84/4)\n// 84 BPM perçu, 4 temps par cycle\n\ns(\"hh*16\").gain(.18).sometimes(x => x.speed(\".5\"))",
               "whatToListenFor": "Certains passages doivent sonner comme de courts ralentissements.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "sometimes crée des accidents contrôlés."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "sometimes crée des accidents contrôlés.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "gen_01_03",
@@ -574,15 +758,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Faites varier le timbre entre sine et triangle.",
-              "concept": "Cet exercice travaille choose, timbre. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 eb3 g3 bb3\").slow(4).gain(.3)",
+              "concept": "Cette leçon fait travailler choose, timbre. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(84/4)\n// 84 BPM perçu, 4 temps par cycle\n\nnote(\"c3 eb3 g3 bb3\").slow(4).gain(.3)",
               "task": "Faites varier le timbre entre sine et triangle.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 eb3 g3 bb3\").s(choose(\"sine\", \"triangle\")).slow(4).gain(.3)",
+              "solution": "setcpm(84/4)\n// 84 BPM perçu, 4 temps par cycle\n\nnote(\"c3 eb3 g3 bb3\").s(choose(\"sine\", \"triangle\")).slow(4).gain(.3)",
               "whatToListenFor": "La nappe garde ses notes, mais le timbre peut changer.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Un choix aléatoire peut rester contraint."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Un choix aléatoire peut rester contraint.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -601,15 +790,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Inversez le motif à la fin d'un groupe de quatre cycles.",
-              "concept": "Cet exercice travaille lastOf, phrase. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 d3 e3 g3\").s(\"triangle\")",
+              "concept": "Cette leçon fait travailler lastOf, phrase. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(84/4)\n// 84 BPM perçu, 4 temps par cycle\n\nnote(\"c3 d3 e3 g3\").s(\"triangle\")",
               "task": "Inversez le motif à la fin d'un groupe de quatre cycles.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 d3 e3 g3\").lastOf(4, x => x.rev()).s(\"triangle\")",
+              "solution": "setcpm(84/4)\n// 84 BPM perçu, 4 temps par cycle\n\nnote(\"c3 d3 e3 g3\").lastOf(4, x => x.rev()).s(\"triangle\")",
               "whatToListenFor": "Le motif doit se retourner uniquement en fin de phrase.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Les conditions donnent une forme aux boucles."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Les conditions donnent une forme aux boucles.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "gen_02_02",
@@ -621,15 +815,20 @@ window.COURSE = {
               "exerciseType": "lire_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Repérez quand la transformation se produit.",
-              "concept": "Cet exercice travaille when, condition. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 eb3 g3\").when(\"<0 1>/2\", x => x.sub(\"5\")).s(\"sine\")",
+              "concept": "Cette leçon fait travailler when, condition. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(84/4)\n// 84 BPM perçu, 4 temps par cycle\n\nnote(\"c3 eb3 g3\").when(\"<0 1>/2\", x => x.sub(\"5\")).s(\"sine\")",
               "task": "Repérez quand la transformation se produit.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 eb3 g3\").when(\"<0 1>/2\", x => x.sub(\"5\")).s(\"sine\")",
+              "solution": "setcpm(84/4)\n// 84 BPM perçu, 4 temps par cycle\n\nnote(\"c3 eb3 g3\").when(\"<0 1>/2\", x => x.sub(\"5\")).s(\"sine\")",
               "whatToListenFor": "Vous devez entendre une alternance entre motif original et motif transposé.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une condition peut piloter une transformation musicale."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une condition peut piloter une transformation musicale.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "gen_02_03",
@@ -641,15 +840,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Inversez une portion du pattern à chaque cycle.",
-              "concept": "Cet exercice travaille chunk, variation locale. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"bd sd hh cp\")",
+              "concept": "Cette leçon fait travailler chunk, variation locale. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(84/4)\n// 84 BPM perçu, 4 temps par cycle\n\ns(\"bd sd hh cp\")",
               "task": "Inversez une portion du pattern à chaque cycle.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"bd sd hh cp\").chunk(4, x => x.rev())",
+              "solution": "setcpm(84/4)\n// 84 BPM perçu, 4 temps par cycle\n\ns(\"bd sd hh cp\").chunk(4, x => x.rev())",
               "whatToListenFor": "La variation doit se déplacer localement dans le motif.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une variation locale garde l'identité globale du motif."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une variation locale garde l'identité globale du motif.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -669,15 +873,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Faites bouger le filtre de manière lente et fluide.",
-              "concept": "Cet exercice travaille perlin, range, cutoff. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 eb3 g3 bb3\").s(\"sawtooth\").gain(.25)",
+              "concept": "Cette leçon fait travailler perlin, range, cutoff. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(60/4)\n// 60 BPM perçu, 4 temps par cycle\n\nnote(\"c3 eb3 g3 bb3\").s(\"sawtooth\").gain(.25)",
               "task": "Faites bouger le filtre de manière lente et fluide.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 eb3 g3 bb3\").s(\"sawtooth\").cutoff(perlin.range(400, 2000)).gain(.25)",
+              "solution": "setcpm(60/4)\n// 60 BPM perçu, 4 temps par cycle\n\nnote(\"c3 eb3 g3 bb3\").s(\"sawtooth\").cutoff(perlin.range(400, 2000)).gain(.25)",
               "whatToListenFor": "Le timbre doit évoluer sans saut trop sec.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Un signal peut piloter un paramètre sonore."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Un signal peut piloter un paramètre sonore.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "gen_03_02",
@@ -690,15 +899,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez une mélodie aléatoire contrainte à une gamme.",
-              "concept": "Cet exercice travaille irand, scale, gamme. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "n(irand(8)).scale(\"C:minor\").s(\"triangle\").gain(.25)",
+              "concept": "Cette leçon fait travailler irand, scale, gamme. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(60/4)\n// 60 BPM perçu, 4 temps par cycle\n\nn(irand(8)).scale(\"C:minor\").s(\"triangle\").gain(.25)",
               "task": "Écoutez une mélodie aléatoire contrainte à une gamme.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "n(irand(8)).scale(\"C:minor\").s(\"triangle\").gain(.25)",
+              "solution": "setcpm(60/4)\n// 60 BPM perçu, 4 temps par cycle\n\nn(irand(8)).scale(\"C:minor\").s(\"triangle\").gain(.25)",
               "whatToListenFor": "La mélodie varie, mais reste cohérente.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "La génération mélodique gagne à être limitée par une gamme."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "La génération mélodique gagne à être limitée par une gamme.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "gen_03_03",
@@ -710,15 +924,20 @@ window.COURSE = {
               "exerciseType": "composer_contraintes",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Créez une texture qui change sans perdre son identité.",
-              "concept": "Cet exercice travaille génératif, texture. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  n(irand(8)).scale(\"C:minor\").s(\"sine\").slow(4).room(.8).gain(.2),\n  s(\"hh*8\").degradeBy(.5).gain(.1)\n)",
+              "concept": "Cette leçon fait travailler génératif, texture. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(60/4)\n// 60 BPM perçu, 4 temps par cycle\n\nstack(\n  n(irand(8)).scale(\"C:minor\").s(\"sine\").slow(4).room(.8).gain(.2),\n  s(\"hh*8\").degradeBy(.5).gain(.1)\n)",
               "task": "Créez une texture qui change sans perdre son identité.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  note(\"c2\").s(\"sine\").slow(8).gain(.2),\n  n(irand(8)).scale(\"C:minor\").s(\"sine\").slow(4).room(.8).gain(.18),\n  s(\"hh*8\").degradeBy(.5).gain(.08)\n)",
+              "solution": "setcpm(60/4)\n// 60 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"c2\").s(\"sine\").slow(8).gain(.2),\n  n(irand(8)).scale(\"C:minor\").s(\"sine\").slow(4).room(.8).gain(.18),\n  s(\"hh*8\").degradeBy(.5).gain(.08)\n)",
               "whatToListenFor": "L'ensemble doit sembler vivant, mais pas chaotique.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Composer génératif consiste à définir un cadre d'évolution."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Composer génératif consiste à définir un cadre d'évolution.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         }
@@ -746,15 +965,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Modifiez une seule note et écoutez l'effet sur la boucle.",
-              "concept": "Cet exercice travaille boucle, motif. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c4 e4 g4 e4\").s(\"sine\").gain(.35)",
+              "concept": "Cette leçon fait travailler boucle, motif. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nnote(\"c4 e4 g4 e4\").s(\"sine\").gain(.35)",
               "task": "Modifiez une seule note et écoutez l'effet sur la boucle.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c4 e4 a4 e4\").s(\"sine\").gain(.35)",
+              "solution": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nnote(\"c4 e4 a4 e4\").s(\"sine\").gain(.35)",
               "whatToListenFor": "Une petite modification doit changer la couleur sans casser la boucle.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une boucle minimale doit être assez simple pour être mémorisée."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une boucle minimale doit être assez simple pour être mémorisée.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "min_01_02",
@@ -766,15 +990,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Faites évoluer le motif par le filtre plutôt que par les notes.",
-              "concept": "Cet exercice travaille filtre, micro-variation. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c4 e4 g4 e4\").s(\"sine\").gain(.35)",
+              "concept": "Cette leçon fait travailler filtre, micro-variation. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nnote(\"c4 e4 g4 e4\").s(\"sine\").gain(.35)",
               "task": "Faites évoluer le motif par le filtre plutôt que par les notes.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c4 e4 g4 e4\").s(\"sine\").lpf(\"<600 900 1200 800>\").gain(.35)",
+              "solution": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nnote(\"c4 e4 g4 e4\").s(\"sine\").lpf(\"<600 900 1200 800>\").gain(.35)",
               "whatToListenFor": "Le motif reste identique, mais la couleur bouge.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une micro-variation peut suffire à créer une évolution."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une micro-variation peut suffire à créer une évolution.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -793,15 +1022,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une deuxième version du même motif avec un timbre différent.",
-              "concept": "Cet exercice travaille doublage, superposition. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c4 e4 g4 e4\").s(\"sine\").gain(.3)",
+              "concept": "Cette leçon fait travailler doublage, superposition. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nnote(\"c4 e4 g4 e4\").s(\"sine\").gain(.3)",
               "task": "Ajoutez une deuxième version du même motif avec un timbre différent.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  note(\"c4 e4 g4 e4\").s(\"sine\").gain(.3),\n  note(\"c4 e4 g4 e4\").s(\"triangle\").gain(.22)\n)",
+              "solution": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"c4 e4 g4 e4\").s(\"sine\").gain(.3),\n  note(\"c4 e4 g4 e4\").s(\"triangle\").gain(.22)\n)",
               "whatToListenFor": "Les deux lignes doivent fusionner sans être identiques.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Le phasing commence souvent par deux motifs proches."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Le phasing commence souvent par deux motifs proches.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "min_02_02",
@@ -813,15 +1047,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez la dérive entre les deux motifs.",
-              "concept": "Cet exercice travaille phasing, dérive. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  note(\"c4 e4 g4 e4\").s(\"sine\").gain(.3),\n  note(\"c4 e4 g4 e4\").s(\"triangle\").slow(1.01).gain(.22)\n)",
+              "concept": "Cette leçon fait travailler phasing, dérive. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"c4 e4 g4 e4\").s(\"sine\").gain(.3),\n  note(\"c4 e4 g4 e4\").s(\"triangle\").slow(1.01).gain(.22)\n)",
               "task": "Écoutez la dérive entre les deux motifs.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  note(\"c4 e4 g4 e4\").s(\"sine\").gain(.3),\n  note(\"c4 e4 g4 e4\").s(\"triangle\").slow(1.01).gain(.22)\n)",
+              "solution": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"c4 e4 g4 e4\").s(\"sine\").gain(.3),\n  note(\"c4 e4 g4 e4\").s(\"triangle\").slow(1.01).gain(.22)\n)",
               "whatToListenFor": "Les attaques se déplacent lentement les unes par rapport aux autres.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Le phasing crée une évolution à partir d'un écart minime."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Le phasing crée une évolution à partir d'un écart minime.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -840,15 +1079,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez comment les deux lignes se croisent différemment.",
-              "concept": "Cet exercice travaille polymétrie, réalignement. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  note(\"c4 e4 g4\").s(\"sine\").slow(3),\n  note(\"g4 a4 c5 e5\").s(\"triangle\").slow(4).gain(.25)\n)",
+              "concept": "Cette leçon fait travailler polymétrie, réalignement. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"c4 e4 g4\").s(\"sine\").slow(3),\n  note(\"g4 a4 c5 e5\").s(\"triangle\").slow(4).gain(.25)\n)",
               "task": "Écoutez comment les deux lignes se croisent différemment.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  note(\"c4 e4 g4\").s(\"sine\").slow(3).gain(.28),\n  note(\"g4 a4 c5 e5\").s(\"triangle\").slow(4).gain(.2)\n)",
+              "solution": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"c4 e4 g4\").s(\"sine\").slow(3).gain(.28),\n  note(\"g4 a4 c5 e5\").s(\"triangle\").slow(4).gain(.2)\n)",
               "whatToListenFor": "Le point de rencontre des notes change progressivement.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Des boucles de longueurs différentes créent une forme progressive."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Des boucles de longueurs différentes créent une forme progressive.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "min_03_02",
@@ -860,15 +1104,20 @@ window.COURSE = {
               "exerciseType": "mini_performance",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une troisième couche très discrète pour compléter la pièce.",
-              "concept": "Cet exercice travaille forme, évolution lente. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  note(\"c4 e4 g4\").s(\"sine\").slow(3).room(.5).gain(.25),\n  note(\"g4 a4 c5 e5\").s(\"triangle\").slow(4).delay(.2).gain(.18)\n)",
+              "concept": "Cette leçon fait travailler forme, évolution lente. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"c4 e4 g4\").s(\"sine\").slow(3).room(.5).gain(.25),\n  note(\"g4 a4 c5 e5\").s(\"triangle\").slow(4).delay(.2).gain(.18)\n)",
               "task": "Ajoutez une troisième couche très discrète pour compléter la pièce.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  note(\"c2\").s(\"sine\").slow(8).gain(.18),\n  note(\"c4 e4 g4\").s(\"sine\").slow(3).room(.5).gain(.25),\n  note(\"g4 a4 c5 e5\").s(\"triangle\").slow(4).delay(.2).gain(.18)\n)",
+              "solution": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"c2\").s(\"sine\").slow(8).gain(.18),\n  note(\"c4 e4 g4\").s(\"sine\").slow(3).room(.5).gain(.25),\n  note(\"g4 a4 c5 e5\").s(\"triangle\").slow(4).delay(.2).gain(.18)\n)",
               "whatToListenFor": "La pièce doit évoluer sans rupture nette.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "La musique minimaliste peut se construire par superposition lente."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "La musique minimaliste peut se construire par superposition lente.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         }
@@ -897,15 +1146,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Déplacez une grosse caisse pour rendre le beat moins carré.",
-              "concept": "Cet exercice travaille backbeat, kick, snare. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd ~ ~ bd\"),\n  s(\"~ sd ~ sd\")\n).cpm(80)",
+              "concept": "Cette leçon fait travailler backbeat, kick, snare. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(80/4)\n// 80 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ ~ bd\"),\n  s(\"~ sd ~ sd\")\n)",
               "task": "Déplacez une grosse caisse pour rendre le beat moins carré.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd ~ bd ~\").gain(.7),\n  s(\"~ sd ~ sd\").gain(.55)\n).cpm(80)",
+              "solution": "setcpm(80/4)\n// 80 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ bd ~\").gain(.7),\n  s(\"~ sd ~ sd\").gain(.55)\n)",
               "whatToListenFor": "Le beat reste hip-hop, mais le placement du kick change le groove.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Kick et snare donnent l'ossature du beat."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Kick et snare donnent l'ossature du beat.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "urb_01_02",
@@ -917,15 +1171,20 @@ window.COURSE = {
               "exerciseType": "completer_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une couche de hats réguliers et discrets.",
-              "concept": "Cet exercice travaille hats, pulsation. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd ~ ~ bd\"),\n  s(\"~ sd ~ sd\")\n).cpm(80)",
+              "concept": "Cette leçon fait travailler hats, pulsation. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(80/4)\n// 80 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ ~ bd\"),\n  s(\"~ sd ~ sd\")\n)",
               "task": "Ajoutez une couche de hats réguliers et discrets.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd ~ ~ bd\").gain(.7),\n  s(\"~ sd ~ sd\").gain(.55),\n  s(\"hh*8\").gain(.22)\n).cpm(80)",
+              "solution": "setcpm(80/4)\n// 80 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ ~ bd\").gain(.7),\n  s(\"~ sd ~ sd\").gain(.55),\n  s(\"hh*8\").gain(.22)\n)",
               "whatToListenFor": "Les hats doivent stabiliser le groove sans dominer.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Les hats donnent une grille de lecture au beat."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Les hats donnent une grille de lecture au beat.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -944,15 +1203,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Doublez la densité des hats.",
-              "concept": "Cet exercice travaille subdivision, trap. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"hh*8\").gain(.18)",
+              "concept": "Cette leçon fait travailler subdivision, trap. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(70/4)\n// 70 BPM perçu, 4 temps par cycle\n\ns(\"hh*8\").gain(.18)",
               "task": "Doublez la densité des hats.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"hh*16\").gain(.18)",
+              "solution": "setcpm(70/4)\n// 70 BPM perçu, 4 temps par cycle\n\ns(\"hh*16\").gain(.18)",
               "whatToListenFor": "La pulsation devient plus nerveuse.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Les hats trap reposent souvent sur une densité élevée."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Les hats trap reposent souvent sur une densité élevée.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "urb_02_02",
@@ -964,15 +1228,20 @@ window.COURSE = {
               "exerciseType": "completer_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez un roll local de quatre hats rapides.",
-              "concept": "Cet exercice travaille roll, crochets. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"hh*8 ~ hh*8\").gain(.18)",
+              "concept": "Cette leçon fait travailler roll, crochets. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(70/4)\n// 70 BPM perçu, 4 temps par cycle\n\ns(\"hh*8 ~ hh*8\").gain(.18)",
               "task": "Ajoutez un roll local de quatre hats rapides.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"hh*8 [hh hh hh hh] hh*8\").gain(.18)",
+              "solution": "setcpm(70/4)\n// 70 BPM perçu, 4 temps par cycle\n\ns(\"hh*8 [hh hh hh hh] hh*8\").gain(.18)",
               "whatToListenFor": "Le roll doit apparaître comme un détail rapide.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Un roll est une densification localisée."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Un roll est une densification localisée.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -991,15 +1260,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Faites varier la vitesse de lecture du clap.",
-              "concept": "Cet exercice travaille sample, speed. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"cp ~ [cp cp] ~\")",
+              "concept": "Cette leçon fait travailler sample, speed. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(74/4)\n// 74 BPM perçu, 4 temps par cycle\n\ns(\"cp ~ [cp cp] ~\")",
               "task": "Faites varier la vitesse de lecture du clap.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"cp ~ [cp cp] ~\").speed(\"<1 .8 1.2>\")",
+              "solution": "setcpm(74/4)\n// 74 BPM perçu, 4 temps par cycle\n\ns(\"cp ~ [cp cp] ~\").speed(\"<1 .8 1.2>\")",
               "whatToListenFor": "Le clap doit changer légèrement de couleur.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "speed transforme un sample sans changer son nom."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "speed transforme un sample sans changer son nom.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "urb_03_02",
@@ -1011,15 +1285,20 @@ window.COURSE = {
               "exerciseType": "mini_performance",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une petite couleur harmonique lente au beat.",
-              "concept": "Cet exercice travaille lo-fi, tempo lent. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd ~ ~ bd\"),\n  s(\"~ sd ~ sd\"),\n  s(\"hh*8\").gain(.14).degradeBy(.15)\n).cpm(72)",
+              "concept": "Cette leçon fait travailler lo-fi, tempo lent. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ ~ bd\"),\n  s(\"~ sd ~ sd\"),\n  s(\"hh*8\").gain(.14).degradeBy(.15)\n)",
               "task": "Ajoutez une petite couleur harmonique lente au beat.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd ~ ~ bd\").gain(.65),\n  s(\"~ sd ~ sd\").gain(.5),\n  s(\"hh*8\").gain(.14).degradeBy(.15),\n  note(\"c3 eb3 g3 bb3\").s(\"triangle\").slow(4).lpf(900).gain(.18)\n).cpm(72)",
+              "solution": "setcpm(72/4)\n// 72 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ ~ bd\").gain(.65),\n  s(\"~ sd ~ sd\").gain(.5),\n  s(\"hh*8\").gain(.14).degradeBy(.15),\n  note(\"c3 eb3 g3 bb3\").s(\"triangle\").slow(4).lpf(900).gain(.18)\n)",
               "whatToListenFor": "Le résultat doit être détendu et légèrement instable.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Un beat lo-fi gagne souvent à rester sobre."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Un beat lo-fi gagne souvent à rester sobre.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         }
@@ -1048,15 +1327,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Rendez la nappe plus douce avec attack et release.",
-              "concept": "Cet exercice travaille sine, slow, enveloppe. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).gain(.3)",
+              "concept": "Cette leçon fait travailler sine, slow, enveloppe. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(52/4)\n// 52 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).gain(.3)",
               "task": "Rendez la nappe plus douce avec attack et release.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).attack(3).release(6).gain(.3)",
+              "solution": "setcpm(52/4)\n// 52 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).attack(3).release(6).gain(.3)",
               "whatToListenFor": "Le son doit apparaître et disparaître lentement.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une nappe combine durée, timbre et enveloppe."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une nappe combine durée, timbre et enveloppe.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "amb_01_02",
@@ -1068,15 +1352,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une sensation d'espace profond.",
-              "concept": "Cet exercice travaille room, delay. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).attack(3).release(6).gain(.3)",
+              "concept": "Cette leçon fait travailler room, delay. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(52/4)\n// 52 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).attack(3).release(6).gain(.3)",
               "task": "Ajoutez une sensation d'espace profond.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).attack(3).release(6).room(.9).delay(.2).delaytime(.5).gain(.25)",
+              "solution": "setcpm(52/4)\n// 52 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).attack(3).release(6).room(.9).delay(.2).delaytime(.5).gain(.25)",
               "whatToListenFor": "La nappe doit s'étendre et laisser une traîne.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "L'ambient travaille beaucoup l'espace sonore."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "L'ambient travaille beaucoup l'espace sonore.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1095,15 +1384,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez un filtre pour rendre le sawtooth plus doux.",
-              "concept": "Cet exercice travaille sawtooth, lpf. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 eb3 g3 bb3\").s(\"sawtooth\").slow(8).gain(.22)",
+              "concept": "Cette leçon fait travailler sawtooth, lpf. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(52/4)\n// 52 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,eb3,g3,bb3]\").s(\"sawtooth\").slow(8).gain(.22)",
               "task": "Ajoutez un filtre pour rendre le sawtooth plus doux.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 eb3 g3 bb3\").s(\"sawtooth\").slow(8).lpf(700).room(.8).gain(.22)",
+              "solution": "setcpm(52/4)\n// 52 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,eb3,g3,bb3]\").s(\"sawtooth\").slow(8).lpf(700).room(.8).gain(.22)",
               "whatToListenFor": "Le son doit rester riche, mais moins agressif.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Un son riche peut devenir ambient grâce au filtrage."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Un son riche peut devenir ambient grâce au filtrage.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "amb_02_02",
@@ -1115,15 +1409,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Faites varier lentement la fréquence du filtre.",
-              "concept": "Cet exercice travaille paramètre pattern, mouvement. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 eb3 g3 bb3\").s(\"sawtooth\").slow(8).lpf(700).room(.8).gain(.22)",
+              "concept": "Cette leçon fait travailler paramètre pattern, mouvement. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(52/4)\n// 52 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,eb3,g3,bb3]\").s(\"sawtooth\").slow(8).lpf(700).room(.8).gain(.22)",
               "task": "Faites varier lentement la fréquence du filtre.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 eb3 g3 bb3\").s(\"sawtooth\").slow(8).lpf(\"<400 700 1200 600>\").room(.8).gain(.22)",
+              "solution": "setcpm(52/4)\n// 52 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,eb3,g3,bb3]\").s(\"sawtooth\").slow(8).lpf(\"<400 700 1200 600>\").room(.8).gain(.22)",
               "whatToListenFor": "La texture doit s'ouvrir et se refermer doucement.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Les paramètres peuvent devenir des motifs."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Les paramètres peuvent devenir des motifs.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1142,15 +1441,20 @@ window.COURSE = {
               "exerciseType": "completer_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez un kick rare sous la nappe.",
-              "concept": "Cet exercice travaille pulsation lente, kick. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.9).gain(.25)",
+              "concept": "Cette leçon fait travailler pulsation lente, kick. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(52/4)\n// 52 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).room(.9).gain(.25)",
               "task": "Ajoutez un kick rare sous la nappe.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.9).gain(.25),\n  s(\"bd ~ ~ ~\").gain(.25)\n).cpm(52)",
+              "solution": "setcpm(52/4)\n// 52 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).room(.9).gain(.25),\n  s(\"bd ~ ~ ~\").gain(.25)\n)",
               "whatToListenFor": "Le kick doit être un repère, pas un beat dominant.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une pulsation minimale peut soutenir une texture."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une pulsation minimale peut soutenir une texture.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "amb_03_02",
@@ -1162,15 +1466,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez des hats discrets et partiellement aléatoires.",
-              "concept": "Cet exercice travaille hats discrets, degradeBy. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.9).gain(.25),\n  s(\"bd ~ ~ ~\").gain(.25)\n).cpm(52)",
+              "concept": "Cette leçon fait travailler hats discrets, degradeBy. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(52/4)\n// 52 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).room(.9).gain(.25),\n  s(\"bd ~ ~ ~\").gain(.25)\n)",
               "task": "Ajoutez des hats discrets et partiellement aléatoires.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.9).gain(.25),\n  s(\"bd ~ ~ ~\").gain(.25),\n  s(\"~ hh ~ hh\").gain(.12).degradeBy(.2).room(.5)\n).cpm(52)",
+              "solution": "setcpm(52/4)\n// 52 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).room(.9).gain(.25),\n  s(\"bd ~ ~ ~\").gain(.25),\n  s(\"~ hh ~ hh\").gain(.12).degradeBy(.2).room(.5)\n)",
               "whatToListenFor": "Les hats doivent ressembler à une présence légère.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "L'ambient beat équilibre ancrage et espace."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "L'ambient beat équilibre ancrage et espace.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         }
@@ -1198,15 +1507,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Changez le tempo sans modifier la structure du kick.",
-              "concept": "Cet exercice travaille 4 to the floor, kick. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"bd*4\").gain(.7).cpm(120)",
+              "concept": "Cette leçon fait travailler 4 to the floor, kick. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(120/4)\n// 120 BPM perçu, 4 temps par cycle\n\ns(\"bd*4\").gain(.7)",
               "task": "Changez le tempo sans modifier la structure du kick.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"bd*4\").gain(.7).cpm(124)",
+              "solution": "setcpm(124/4)\n// 124 BPM perçu, 4 temps par cycle\n\ns(\"bd*4\").gain(.7)",
               "whatToListenFor": "Le kick doit rester régulier et stable.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Le 4 to the floor repose sur un kick régulier."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Le 4 to the floor repose sur un kick régulier.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "dnc_01_02",
@@ -1218,15 +1532,20 @@ window.COURSE = {
               "exerciseType": "completer_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez un hat sur les contretemps.",
-              "concept": "Cet exercice travaille offbeat, contretemps. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"bd*4\").gain(.7).cpm(120)",
+              "concept": "Cette leçon fait travailler offbeat, contretemps. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(120/4)\n// 120 BPM perçu, 4 temps par cycle\n\ns(\"bd*4\").gain(.7)",
               "task": "Ajoutez un hat sur les contretemps.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd*4\").gain(.7),\n  s(\"~ hh ~ hh\").gain(.25)\n).cpm(120)",
+              "solution": "setcpm(120/4)\n// 120 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd*4\").gain(.7),\n  s(\"~ hh ~ hh\").gain(.25)\n)",
               "whatToListenFor": "Le hat doit donner une poussée entre les kicks.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "L'offbeat donne beaucoup d'énergie à la house et à la techno."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "L'offbeat donne beaucoup d'énergie à la house et à la techno.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1245,15 +1564,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Filtrez la basse pour la rendre plus ronde.",
-              "concept": "Cet exercice travaille bassline, filtre. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c2 ~ c2 eb2\").s(\"sawtooth\").gain(.3)",
+              "concept": "Cette leçon fait travailler bassline, filtre. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(124/4)\n// 124 BPM perçu, 4 temps par cycle\n\nnote(\"c2 ~ c2 eb2\").s(\"sawtooth\").gain(.3)",
               "task": "Filtrez la basse pour la rendre plus ronde.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c2 ~ c2 eb2\").s(\"sawtooth\").lpf(500).gain(.3)",
+              "solution": "setcpm(124/4)\n// 124 BPM perçu, 4 temps par cycle\n\nnote(\"c2 ~ c2 eb2\").s(\"sawtooth\").lpf(500).gain(.3)",
               "whatToListenFor": "La basse doit être présente mais moins brillante.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une bassline simple peut porter toute une boucle."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une bassline simple peut porter toute une boucle.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "dnc_02_02",
@@ -1265,15 +1589,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Rendez l'accord plus court et filtré.",
-              "concept": "Cet exercice travaille stab, accord court. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c4 eb4 g4\").s(\"sawtooth\").gain(.22)",
+              "concept": "Cette leçon fait travailler stab, accord court. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(124/4)\n// 124 BPM perçu, 4 temps par cycle\n\nnote(\"c4 eb4 g4\").s(\"sawtooth\").gain(.22)",
               "task": "Rendez l'accord plus court et filtré.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c4 eb4 g4\").s(\"sawtooth\").lpf(900).release(.2).gain(.22)",
+              "solution": "setcpm(124/4)\n// 124 BPM perçu, 4 temps par cycle\n\nnote(\"c4 eb4 g4\").s(\"sawtooth\").lpf(900).release(.2).gain(.22)",
               "whatToListenFor": "Le stab doit être bref et rythmique.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Le stab est un accent harmonique court."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Le stab est un accent harmonique court.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1292,15 +1621,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Remplacez le filtre fixe par une progression de valeurs.",
-              "concept": "Cet exercice travaille filtre, tension. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c2 ~ c2 eb2\").s(\"sawtooth\").lpf(300).gain(.3)",
+              "concept": "Cette leçon fait travailler filtre, tension. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(124/4)\n// 124 BPM perçu, 4 temps par cycle\n\nnote(\"c2 ~ c2 eb2\").s(\"sawtooth\").lpf(300).gain(.3)",
               "task": "Remplacez le filtre fixe par une progression de valeurs.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c2 ~ c2 eb2\").s(\"sawtooth\").lpf(\"<300 500 800 1200>\").gain(.3)",
+              "solution": "setcpm(124/4)\n// 124 BPM perçu, 4 temps par cycle\n\nnote(\"c2 ~ c2 eb2\").s(\"sawtooth\").lpf(\"<300 500 800 1200>\").gain(.3)",
               "whatToListenFor": "La basse doit devenir progressivement plus brillante.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "La tension peut venir d'un paramètre qui évolue."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "La tension peut venir d'un paramètre qui évolue.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "dnc_03_02",
@@ -1313,15 +1647,20 @@ window.COURSE = {
               "exerciseType": "mini_performance",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Préparez une version sans kick pour créer un break.",
-              "concept": "Cet exercice travaille forme, break, reprise. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd*4\").gain(.7),\n  s(\"~ hh ~ hh\").gain(.25),\n  note(\"c2 ~ c2 eb2\").s(\"sawtooth\").lpf(\"<400 700 1200 900>\").gain(.3)\n).cpm(124)",
+              "concept": "Cette leçon fait travailler forme, break, reprise. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(124/4)\n// 124 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd*4\").gain(.7),\n  s(\"~ hh ~ hh\").gain(.25),\n  note(\"c2 ~ c2 eb2\").s(\"sawtooth\").lpf(\"<400 700 1200 900>\").gain(.3)\n)",
               "task": "Préparez une version sans kick pour créer un break.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  // s(\"bd*4\").gain(.7),\n  s(\"~ hh ~ hh\").gain(.25),\n  note(\"c2 ~ c2 eb2\").s(\"sawtooth\").lpf(\"<400 700 1200 900>\").gain(.3)\n).cpm(124)",
+              "solution": "setcpm(124/4)\n// 124 BPM perçu, 4 temps par cycle\n\nstack(\n  // s(\"bd*4\").gain(.7),\n  s(\"~ hh ~ hh\").gain(.25),\n  note(\"c2 ~ c2 eb2\").s(\"sawtooth\").lpf(\"<400 700 1200 900>\").gain(.3)\n)",
               "whatToListenFor": "Sans kick, l'énergie baisse. Le retour du kick crée la reprise.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Un break fonctionne par retrait autant que par ajout."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Un break fonctionne par retrait autant que par ajout.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         }
@@ -1349,15 +1688,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une couche de hats pour mieux sentir le groove.",
-              "concept": "Cet exercice travaille subdivision, crochets. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"[bd ~] [~ sd] [bd bd] [~ sd]\").gain(.6)",
+              "concept": "Cette leçon fait travailler subdivision, crochets. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\ns(\"[bd ~] [~ sd] [bd bd] [~ sd]\").gain(.6)",
               "task": "Ajoutez une couche de hats pour mieux sentir le groove.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"[bd ~] [~ sd] [bd bd] [~ sd], hh*8\").gain(.55)",
+              "solution": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\ns(\"[bd ~] [~ sd] [bd bd] [~ sd], hh*8\").gain(.55)",
               "whatToListenFor": "Le beat doit sembler cassé mais lisible.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Un broken beat garde souvent un repère stable."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Un broken beat garde souvent un repère stable.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "gbb_01_02",
@@ -1369,15 +1713,20 @@ window.COURSE = {
               "exerciseType": "completer_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Remplacez les hats réguliers par des hats plus irréguliers.",
-              "concept": "Cet exercice travaille micro-subdivision, hats. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"[bd ~] [~ sd] [bd bd] [~ sd], hh*8\").gain(.5)",
+              "concept": "Cette leçon fait travailler micro-subdivision, hats. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\ns(\"[bd ~] [~ sd] [bd bd] [~ sd], hh*8\").gain(.5)",
               "task": "Remplacez les hats réguliers par des hats plus irréguliers.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"[bd ~] [~ sd] [bd bd] [~ sd], [hh ~ hh hh]*2\").gain(.5)",
+              "solution": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\ns(\"[bd ~] [~ sd] [bd bd] [~ sd], [hh ~ hh hh]*2\").gain(.5)",
               "whatToListenFor": "Les hats doivent produire des détails internes.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Le détail rythmique peut être localisé dans une couche."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Le détail rythmique peut être localisé dans une couche.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1396,15 +1745,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Supprimez aléatoirement une partie des hats.",
-              "concept": "Cet exercice travaille degradeBy, hasard. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"hh*16\").gain(.18)",
+              "concept": "Cette leçon fait travailler degradeBy, hasard. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\ns(\"hh*16\").gain(.18)",
               "task": "Supprimez aléatoirement une partie des hats.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"hh*16\").gain(.18).degradeBy(.35)",
+              "solution": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\ns(\"hh*16\").gain(.18).degradeBy(.35)",
               "whatToListenFor": "La couche doit devenir trouée sans disparaître.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Le glitch contrôlé laisse des repères."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Le glitch contrôlé laisse des repères.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "gbb_02_02",
@@ -1416,15 +1770,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Faites varier la vitesse avec une valeur négative pour inverser certains sons.",
-              "concept": "Cet exercice travaille speed, reverse. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "s(\"hh*16\").gain(.18).degradeBy(.25)",
+              "concept": "Cette leçon fait travailler speed, reverse. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\ns(\"hh*16\").gain(.18).degradeBy(.25)",
               "task": "Faites varier la vitesse avec une valeur négative pour inverser certains sons.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "s(\"hh*16\").gain(.18).speed(\"<1 2 .5 -1>\").degradeBy(.25)",
+              "solution": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\ns(\"hh*16\").gain(.18).speed(\"<1 2 .5 -1>\").degradeBy(.25)",
               "whatToListenFor": "Certains hats doivent changer de hauteur ou se retourner.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "speed transforme la lecture d'un sample."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "speed transforme la lecture d'un sample.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1444,15 +1803,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez le break rejoué tranche par tranche.",
-              "concept": "Cet exercice travaille slice, break, sample. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "samples('github:tidalcycles/dirt-samples')\n\ns(\"breaks125\").fit().slice(8, \"0 1 2 3 4 5 6 7\").gain(.7)",
+              "concept": "Cette leçon fait travailler slice, break, sample. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\nsamples('github:tidalcycles/dirt-samples')\n\ns(\"breaks125\").fit().slice(8, \"0 1 2 3 4 5 6 7\").gain(.7)",
               "task": "Écoutez le break rejoué tranche par tranche.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "samples('github:tidalcycles/dirt-samples')\n\ns(\"breaks125\").fit().slice(8, \"0 1 2 3 4 5 6 7\").gain(.7)",
+              "solution": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\nsamples('github:tidalcycles/dirt-samples')\n\ns(\"breaks125\").fit().slice(8, \"0 1 2 3 4 5 6 7\").gain(.7)",
               "whatToListenFor": "Le break doit sonner proche de son ordre original.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Un break peut devenir un matériau recomposable."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Un break peut devenir un matériau recomposable.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "gbb_03_02",
@@ -1464,15 +1828,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Réorganisez quelques tranches pour créer un break plus accidenté.",
-              "concept": "Cet exercice travaille resequence, glitch. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "samples('github:tidalcycles/dirt-samples')\n\ns(\"breaks125\").fit().slice(8, \"0 1 2 3 4 5 6 7\").gain(.7)",
+              "concept": "Cette leçon fait travailler resequence, glitch. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\nsamples('github:tidalcycles/dirt-samples')\n\ns(\"breaks125\").fit().slice(8, \"0 1 2 3 4 5 6 7\").gain(.7)",
               "task": "Réorganisez quelques tranches pour créer un break plus accidenté.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "samples('github:tidalcycles/dirt-samples')\n\ns(\"breaks125\").fit().slice(8, \"0 1 [2 2] 3 <4 7> 5 [6 0] 7\").gain(.7)",
+              "solution": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\nsamples('github:tidalcycles/dirt-samples')\n\ns(\"breaks125\").fit().slice(8, \"0 1 [2 2] 3 <4 7> 5 [6 0] 7\").gain(.7)",
               "whatToListenFor": "Le break doit être reconnaissable mais recomposé.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Le glitch efficace modifie une structure encore perceptible."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Le glitch efficace modifie une structure encore perceptible.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1491,15 +1860,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez la relation entre les trois répartitions.",
-              "concept": "Cet exercice travaille euclid, polyrythmie. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd(5,16)\").gain(.7),\n  s(\"sd(3,8,2)\").gain(.45),\n  s(\"hh(7,16)\").gain(.18)\n).cpm(92)",
+              "concept": "Cette leçon fait travailler euclid, polyrythmie. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd(5,16)\").gain(.7),\n  s(\"sd(3,8,2)\").gain(.45),\n  s(\"hh(7,16)\").gain(.18)\n)",
               "task": "Écoutez la relation entre les trois répartitions.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd(5,16)\").gain(.7),\n  s(\"sd(3,8,2)\").gain(.45),\n  s(\"hh(7,16)\").gain(.18)\n).cpm(92)",
+              "solution": "setcpm(92/4)\n// 92 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd(5,16)\").gain(.7),\n  s(\"sd(3,8,2)\").gain(.45),\n  s(\"hh(7,16)\").gain(.18)\n)",
               "whatToListenFor": "Le groove doit être asymétrique sans être aléatoire.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Les rythmes euclidiens sont utiles pour les grooves instables."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Les rythmes euclidiens sont utiles pour les grooves instables.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         }
@@ -1527,15 +1901,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez la différence de registre entre les trois notes.",
-              "concept": "Cet exercice travaille note, octave. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 c4 c5\").s(\"sine\")",
+              "concept": "Cette leçon fait travailler note, octave. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"c3 c4 c5\").s(\"sine\")",
               "task": "Écoutez la différence de registre entre les trois notes.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 c4 c5\").s(\"sine\")",
+              "solution": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"c3 c4 c5\").s(\"sine\")",
               "whatToListenFor": "Les trois notes portent le même nom, mais pas le même registre.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "L'octave situe une note dans le grave ou l'aigu."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "L'octave situe une note dans le grave ou l'aigu.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1554,15 +1933,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez la couleur de cet accord mineur.",
-              "concept": "Cet exercice travaille accord, mineur. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 eb3 g3\").s(\"sine\").slow(4)",
+              "concept": "Cette leçon fait travailler accord, mineur. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,eb3,g3]\").s(\"sine\").slow(4)",
               "task": "Écoutez la couleur de cet accord mineur.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 eb3 g3\").s(\"sine\").slow(4)",
+              "solution": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,eb3,g3]\").s(\"sine\").slow(4)",
               "whatToListenFor": "La couleur doit paraître plutôt sombre ou introspective.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Un accord est une couleur harmonique."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Un accord est une couleur harmonique.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "thr_02_02",
@@ -1574,15 +1958,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Comparez cette couleur avec l'accord mineur précédent.",
-              "concept": "Cet exercice travaille accord, majeur. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 e3 g3\").s(\"sine\").slow(4)",
+              "concept": "Cette leçon fait travailler accord, majeur. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,e3,g3]\").s(\"sine\").slow(4)",
               "task": "Comparez cette couleur avec l'accord mineur précédent.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c3 e3 g3\").s(\"sine\").slow(4)",
+              "solution": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,e3,g3]\").s(\"sine\").slow(4)",
               "whatToListenFor": "La couleur doit paraître plus ouverte que le mineur.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une seule note peut changer la couleur d'un accord."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une seule note peut changer la couleur d'un accord.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1601,15 +1990,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une deuxième couleur en alternance avec un autre accord.",
-              "concept": "Cet exercice travaille progression, accords. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(4).room(.7)",
+              "concept": "Cette leçon fait travailler progression, accords. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(4).room(.7)",
               "task": "Ajoutez une deuxième couleur en alternance avec un autre accord.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"<c3 eb3 g3 bb3 f3 ab3 c4 eb4>\").s(\"sine\").slow(4).room(.7).gain(.25)",
+              "solution": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"<c3 eb3 g3 bb3 f3 ab3 c4 eb4>\").s(\"sine\").slow(4).room(.7).gain(.25)",
               "whatToListenFor": "La progression doit donner une sensation de déplacement harmonique.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une progression est un déplacement entre plusieurs couleurs."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une progression est un déplacement entre plusieurs couleurs.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1628,15 +2022,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Transformez la phrase pour qu'elle finisse sur c5.",
-              "concept": "Cet exercice travaille mélodie, phrase. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c4 eb4 g4 bb4\").s(\"triangle\").gain(.25)",
+              "concept": "Cette leçon fait travailler mélodie, phrase. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"c4 eb4 g4 bb4\").s(\"triangle\").gain(.25)",
               "task": "Transformez la phrase pour qu'elle finisse sur c5.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c4 eb4 g4 c5\").s(\"triangle\").gain(.25)",
+              "solution": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"c4 eb4 g4 c5\").s(\"triangle\").gain(.25)",
               "whatToListenFor": "La phrase doit sembler monter vers une résolution.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une mélodie est aussi une direction."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une mélodie est aussi une direction.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "thr_04_02",
@@ -1648,15 +2047,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une inversion en fin de phrase.",
-              "concept": "Cet exercice travaille variation, reverse. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c4 eb4 g4 bb4\").s(\"triangle\").gain(.25)",
+              "concept": "Cette leçon fait travailler variation, reverse. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"c4 eb4 g4 bb4\").s(\"triangle\").gain(.25)",
               "task": "Ajoutez une inversion en fin de phrase.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c4 eb4 g4 bb4\").lastOf(4, x => x.rev()).s(\"triangle\").gain(.25)",
+              "solution": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nnote(\"c4 eb4 g4 bb4\").lastOf(4, x => x.rev()).s(\"triangle\").gain(.25)",
               "whatToListenFor": "La phrase doit garder son identité et varier périodiquement.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une bonne variation conserve un lien avec le motif initial."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une bonne variation conserve un lien avec le motif initial.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1675,15 +2079,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez les trois niveaux de vitesse.",
-              "concept": "Cet exercice travaille pulsation, subdivision. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd*4\"),\n  s(\"hh*8\").gain(.25),\n  s(\"cp*16\").gain(.12)\n)",
+              "concept": "Cette leçon fait travailler pulsation, subdivision. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd*4\"),\n  s(\"hh*8\").gain(.25),\n  s(\"cp*16\").gain(.12)\n)",
               "task": "Écoutez les trois niveaux de vitesse.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd*4\").gain(.65),\n  s(\"hh*8\").gain(.25),\n  s(\"cp*16\").gain(.12)\n)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd*4\").gain(.65),\n  s(\"hh*8\").gain(.25),\n  s(\"cp*16\").gain(.12)\n)",
               "whatToListenFor": "Vous devez entendre une grille rythmique à plusieurs niveaux.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "La subdivision découpe une pulsation en valeurs plus fines."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "La subdivision découpe une pulsation en valeurs plus fines.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "thr_05_02",
@@ -1695,15 +2104,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez comment le hat pousse entre les kicks.",
-              "concept": "Cet exercice travaille offbeat, contretemps. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd*4\"),\n  s(\"~ hh ~ hh\").gain(.25)\n)",
+              "concept": "Cette leçon fait travailler offbeat, contretemps. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd*4\"),\n  s(\"~ hh ~ hh\").gain(.25)\n)",
               "task": "Écoutez comment le hat pousse entre les kicks.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd*4\").gain(.65),\n  s(\"~ hh ~ hh\").gain(.25)\n)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd*4\").gain(.65),\n  s(\"~ hh ~ hh\").gain(.25)\n)",
               "whatToListenFor": "Le contretemps doit créer une sensation de rebond.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Le contretemps est un appui entre les appuis principaux."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Le contretemps est un appui entre les appuis principaux.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "thr_05_03",
@@ -1715,15 +2129,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez deux répartitions dans le même cadre.",
-              "concept": "Cet exercice travaille polyrythmie, 3 contre 4. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  s(\"bd(3,8)\"),\n  s(\"hh(4,8)\").gain(.25)\n)",
+              "concept": "Cette leçon fait travailler polyrythmie, 3 contre 4. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd(3,8)\"),\n  s(\"hh(4,8)\").gain(.25)\n)",
               "task": "Écoutez deux répartitions dans le même cadre.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  s(\"bd(3,8)\").gain(.7),\n  s(\"hh(4,8)\").gain(.25)\n)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd(3,8)\").gain(.7),\n  s(\"hh(4,8)\").gain(.25)\n)",
               "whatToListenFor": "Le rapport entre 3 et 4 doit être perceptible.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "La polyrythmie superpose plusieurs découpes du temps."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "La polyrythmie superpose plusieurs découpes du temps.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             },
             {
               "id": "thr_05_04",
@@ -1735,15 +2154,20 @@ window.COURSE = {
               "exerciseType": "comparer_patterns",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Écoutez les réalignements progressifs.",
-              "concept": "Cet exercice travaille polymétrie, longueurs. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  note(\"c4 e4 g4\").slow(3).s(\"sine\"),\n  note(\"g4 a4 c5 e5\").slow(4).s(\"triangle\").gain(.25)\n)",
+              "concept": "Cette leçon fait travailler polymétrie, longueurs. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"c4 e4 g4\").slow(3).s(\"sine\"),\n  note(\"g4 a4 c5 e5\").slow(4).s(\"triangle\").gain(.25)\n)",
               "task": "Écoutez les réalignements progressifs.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  note(\"c4 e4 g4\").slow(3).s(\"sine\").gain(.25),\n  note(\"g4 a4 c5 e5\").slow(4).s(\"triangle\").gain(.18)\n)",
+              "solution": "setcpm(96/4)\n// 96 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"c4 e4 g4\").slow(3).s(\"sine\").gain(.25),\n  note(\"g4 a4 c5 e5\").slow(4).s(\"triangle\").gain(.18)\n)",
               "whatToListenFor": "Les notes ne se rencontrent pas toujours de la même manière.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "La polymétrie superpose des longueurs de phrase différentes."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "La polymétrie superpose des longueurs de phrase différentes.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1762,15 +2186,20 @@ window.COURSE = {
               "exerciseType": "mini_performance",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Préparez une introduction, un développement et un retrait.",
-              "concept": "Cet exercice travaille forme, arrangement. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.8).gain(.25),\n  s(\"bd ~ ~ ~\").gain(.25)\n)",
+              "concept": "Cette leçon fait travailler forme, arrangement. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.8).gain(.25),\n  s(\"bd ~ ~ ~\").gain(.25)\n)",
               "task": "Préparez une introduction, un développement et un retrait.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.8).gain(.25),\n  s(\"bd ~ ~ ~\").gain(.25),\n  s(\"~ hh ~ hh\").gain(.12).degradeBy(.2)\n)",
+              "solution": "setcpm(76/4)\n// 76 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.8).gain(.25),\n  s(\"bd ~ ~ ~\").gain(.25),\n  s(\"~ hh ~ hh\").gain(.12).degradeBy(.2)\n)",
               "whatToListenFor": "La pièce doit pouvoir évoluer par étapes simples.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "La forme organise les transformations dans le temps."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "La forme organise les transformations dans le temps.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         }
@@ -1798,15 +2227,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une variation de vitesse uniquement sur les hats.",
-              "concept": "Cet exercice travaille contraste, instabilité. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.8).gain(.25),\n  s(\"bd(3,8)\").gain(.6),\n  s(\"hh*16\").gain(.15).degradeBy(.4)\n).cpm(88)",
+              "concept": "Cette leçon fait travailler contraste, instabilité. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(88/4)\n// 88 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).room(.8).gain(.25),\n  s(\"bd(3,8)\").gain(.6),\n  s(\"hh*16\").gain(.15).degradeBy(.4)\n)",
               "task": "Ajoutez une variation de vitesse uniquement sur les hats.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.8).gain(.25),\n  s(\"bd(3,8)\").gain(.6),\n  s(\"hh*16\").speed(\"<1 .5 2 -1>\").gain(.15).degradeBy(.4)\n).cpm(88)",
+              "solution": "setcpm(88/4)\n// 88 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).room(.8).gain(.25),\n  s(\"bd(3,8)\").gain(.6),\n  s(\"hh*16\").speed(\"<1 .5 2 -1>\").gain(.15).degradeBy(.4)\n)",
               "whatToListenFor": "La pièce doit combiner fond calme et détails instables.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "L'IDM peut reposer sur une tension entre stabilité et accident."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "L'IDM peut reposer sur une tension entre stabilité et accident.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1825,15 +2259,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez un delay et une reverb pour placer la phrase en arrière-plan.",
-              "concept": "Cet exercice travaille mélodie, delay. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "note(\"c5 eb5 g5 bb5\").s(\"triangle\").slow(3).gain(.18)",
+              "concept": "Cette leçon fait travailler mélodie, delay. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(86/4)\n// 86 BPM perçu, 4 temps par cycle\n\nnote(\"c5 eb5 g5 bb5\").s(\"triangle\").slow(3).gain(.18)",
               "task": "Ajoutez un delay et une reverb pour placer la phrase en arrière-plan.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "note(\"c5 eb5 g5 bb5\").s(\"triangle\").slow(3).delay(.25).room(.7).gain(.18)",
+              "solution": "setcpm(86/4)\n// 86 BPM perçu, 4 temps par cycle\n\nnote(\"c5 eb5 g5 bb5\").s(\"triangle\").slow(3).delay(.25).room(.7).gain(.18)",
               "whatToListenFor": "La mélodie doit flotter plutôt que dominer.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Une phrase fragile peut donner une identité à une texture complexe."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Une phrase fragile peut donner une identité à une texture complexe.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1853,15 +2292,20 @@ window.COURSE = {
               "exerciseType": "modifier_code",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Ajoutez une inversion occasionnelle et une légère suppression d'événements.",
-              "concept": "Cet exercice travaille break, slice, sometimes. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "samples('github:tidalcycles/dirt-samples')\n\ns(\"breaks125\").fit().slice(8, \"0 1 [2 2] 3 <4 7> 5 [6 0] 7\").gain(.55)",
+              "concept": "Cette leçon fait travailler break, slice, sometimes. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(86/4)\n// 86 BPM perçu, 4 temps par cycle\n\nsamples('github:tidalcycles/dirt-samples')\n\ns(\"breaks125\").fit().slice(8, \"0 1 [2 2] 3 <4 7> 5 [6 0] 7\").gain(.55)",
               "task": "Ajoutez une inversion occasionnelle et une légère suppression d'événements.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "samples('github:tidalcycles/dirt-samples')\n\ns(\"breaks125\").fit().slice(8, \"0 1 [2 2] 3 <4 7> 5 [6 0] 7\").sometimes(x => x.speed(\"-1\")).degradeBy(.1).gain(.55)",
+              "solution": "setcpm(86/4)\n// 86 BPM perçu, 4 temps par cycle\n\nsamples('github:tidalcycles/dirt-samples')\n\ns(\"breaks125\").fit().slice(8, \"0 1 [2 2] 3 <4 7> 5 [6 0] 7\").sometimes(x => x.speed(\"-1\")).degradeBy(.1).gain(.55)",
               "whatToListenFor": "Le break doit rester lisible malgré les accidents.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "Un break IDM peut être fragmenté sans être détruit."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "Un break IDM peut être fragmenté sans être détruit.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         },
@@ -1880,15 +2324,20 @@ window.COURSE = {
               "exerciseType": "mini_performance",
               "estimatedDuration": "5 à 8 min",
               "learningGoal": "Préparez trois versions : exposition, fragmentation, reconstruction.",
-              "concept": "Cet exercice travaille forme, live coding. Le but est d'associer une modification précise du code à un effet sonore clairement identifiable.",
-              "starterCode": "stack(\n  note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.85).gain(.25),\n  s(\"bd(5,16)\").gain(.55),\n  s(\"hh(7,16)\").speed(\"<1 .5 2 -1>\").degradeBy(.25).gain(.15),\n  note(\"c5 eb5 g5\").s(\"triangle\").slow(3).delay(.2).gain(.18)\n).cpm(86)",
+              "concept": "Cette leçon fait travailler forme, live coding. Modifiez une seule partie du code, écoutez le résultat, puis comparez avec la correction.",
+              "starterCode": "setcpm(86/4)\n// 86 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).room(.85).gain(.25),\n  s(\"bd(5,16)\").gain(.55),\n  s(\"hh(7,16)\").speed(\"<1 .5 2 -1>\").degradeBy(.25).gain(.15),\n  note(\"c5 eb5 g5\").s(\"triangle\").slow(3).delay(.2).gain(.18)\n)",
               "task": "Préparez trois versions : exposition, fragmentation, reconstruction.",
               "hintLevel1": "Modifiez une seule partie du code, puis écoutez avant d'ajouter une autre transformation.",
               "hintLevel2": "Comparez votre version avec la correction, puis revenez à votre code pour isoler la différence.",
-              "solution": "stack(\n  note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.85).gain(.25),\n  s(\"bd(5,16)\").gain(.55),\n  s(\"hh(7,16)\").speed(\"<1 .5 2 -1>\").degradeBy(.25).gain(.15),\n  note(\"c5 eb5 g5\").s(\"triangle\").slow(3).delay(.2).gain(.18)\n).cpm(86)",
+              "solution": "setcpm(86/4)\n// 86 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).room(.85).gain(.25),\n  s(\"bd(5,16)\").gain(.55),\n  s(\"hh(7,16)\").speed(\"<1 .5 2 -1>\").degradeBy(.25).gain(.15),\n  note(\"c5 eb5 g5\").s(\"triangle\").slow(3).delay(.2).gain(.18)\n)",
               "whatToListenFor": "La pièce doit pouvoir évoluer sans rupture totale d'identité.",
-              "commonMistake": "L'erreur fréquente consiste à modifier trop de paramètres à la fois. Dans Strudel, progressez par petits écarts pour comprendre l'effet de chaque fonction.",
-              "summary": "L'IDM devient lisible quand la complexité est organisée."
+              "commonMistake": "La difficulté la plus fréquente consiste à changer trop de choses en même temps. Gardez le tempo et la structure stables, puis modifiez un seul paramètre.",
+              "summary": "L'IDM devient lisible quand la complexité est organisée.",
+              "tempoNote": "Le code utilise setcpm(BPM/4), car les exercices de cette version considèrent généralement un cycle comme une mesure de quatre temps.",
+              "sourceRefs": [
+                "docs_cycles",
+                "docs_samples"
+              ]
             }
           ]
         }
@@ -1901,28 +2350,52 @@ window.COURSE = {
       "title": "Mini-performance ambient",
       "learningGoal": "Composer une pièce lente, spatiale et évolutive.",
       "deliverable": "Un code Strudel avec nappe, mouvement de filtre, élément mélodique et pulsation discrète.",
-      "starterCode": "stack(\n  note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.9).gain(.25),\n  note(\"g4 bb4 c5 eb5\").s(\"triangle\").slow(6).delay(.25).gain(.16),\n  s(\"bd ~ ~ ~\").gain(.22),\n  s(\"~ hh ~ hh\").gain(.1).degradeBy(.2)\n).cpm(52)"
+      "starterCode": "setcpm(52/4)\n// 52 BPM perçu, 4 temps par cycle\n\nstack(\n  note(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).room(.9).gain(.25),\n  note(\"g4 bb4 c5 eb5\").s(\"triangle\").slow(6).delay(.25).gain(.16),\n  s(\"bd ~ ~ ~\").gain(.22),\n  s(\"~ hh ~ hh\").gain(.1).degradeBy(.2)\n)",
+      "technicalChecklist": [
+        "Le code commence par setcpm(BPM/4).",
+        "Chaque couche a un rôle identifiable.",
+        "Les samples externes sont déclarés avant leur utilisation.",
+        "Le résultat reste lisible malgré les variations."
+      ]
     },
     {
       "id": "pf_02",
       "title": "Mini-performance beat",
       "learningGoal": "Composer un beat urbain avec variation de hats et sample.",
       "deliverable": "Un code Strudel avec kick, snare, hats, variation et sample transformé.",
-      "starterCode": "stack(\n  s(\"bd ~ ~ bd\").gain(.7),\n  s(\"~ sd ~ sd\").gain(.5),\n  s(\"hh*8 [hh hh hh hh] hh*8\").gain(.16),\n  s(\"cp ~ [cp cp] ~\").speed(\"<1 .8 1.2>\").gain(.25)\n).cpm(78)"
+      "starterCode": "setcpm(78/4)\n// 78 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd ~ ~ bd\").gain(.7),\n  s(\"~ sd ~ sd\").gain(.5),\n  s(\"hh*8 [hh hh hh hh] hh*8\").gain(.16),\n  s(\"cp ~ [cp cp] ~\").speed(\"<1 .8 1.2>\").gain(.25)\n)",
+      "technicalChecklist": [
+        "Le code commence par setcpm(BPM/4).",
+        "Chaque couche a un rôle identifiable.",
+        "Les samples externes sont déclarés avant leur utilisation.",
+        "Le résultat reste lisible malgré les variations."
+      ]
     },
     {
       "id": "pf_03",
       "title": "Mini-performance dancefloor",
       "learningGoal": "Composer une boucle techno, house ou trance avec tension progressive.",
       "deliverable": "Un code Strudel avec kick 4 to the floor, bassline, hat offbeat, stab et filtre évolutif.",
-      "starterCode": "stack(\n  s(\"bd*4\").gain(.7),\n  s(\"~ hh ~ hh\").gain(.25),\n  note(\"c2 ~ c2 eb2\").s(\"sawtooth\").lpf(\"<300 500 800 1200>\").gain(.3),\n  note(\"c4 eb4 g4\").s(\"sawtooth\").lpf(900).release(.2).gain(.18)\n).cpm(124)"
+      "starterCode": "setcpm(124/4)\n// 124 BPM perçu, 4 temps par cycle\n\nstack(\n  s(\"bd*4\").gain(.7),\n  s(\"~ hh ~ hh\").gain(.25),\n  note(\"c2 ~ c2 eb2\").s(\"sawtooth\").lpf(\"<300 500 800 1200>\").gain(.3),\n  note(\"c4 eb4 g4\").s(\"sawtooth\").lpf(900).release(.2).gain(.18)\n)",
+      "technicalChecklist": [
+        "Le code commence par setcpm(BPM/4).",
+        "Chaque couche a un rôle identifiable.",
+        "Les samples externes sont déclarés avant leur utilisation.",
+        "Le résultat reste lisible malgré les variations."
+      ]
     },
     {
       "id": "pf_04",
       "title": "Mini-performance glitch IDM",
       "learningGoal": "Composer une pièce hybride avec texture, break découpé, variations génératives et reconstruction.",
       "deliverable": "Un code Strudel avec texture ambient, break glitch, polyrythmie et variations conditionnelles.",
-      "starterCode": "samples('github:tidalcycles/dirt-samples')\n\nstack(\n  note(\"c3 eb3 g3 bb3\").s(\"sine\").slow(8).room(.85).gain(.22),\n  s(\"breaks125\").fit().slice(8, \"0 1 [2 2] 3 <4 7> 5 [6 0] 7\").sometimes(x => x.speed(\"-1\")).degradeBy(.1).gain(.45),\n  s(\"bd(5,16)\").gain(.45),\n  s(\"hh(7,16)\").speed(\"<1 .5 2 -1>\").degradeBy(.25).gain(.12)\n).cpm(86)"
+      "starterCode": "setcpm(86/4)\n// 86 BPM perçu, 4 temps par cycle\n\nsamples('github:tidalcycles/dirt-samples')\n\nstack(\n  note(\"[c3,eb3,g3,bb3]\").s(\"sine\").slow(8).room(.85).gain(.22),\n  s(\"breaks125\").fit().slice(8, \"0 1 [2 2] 3 <4 7> 5 [6 0] 7\").sometimes(x => x.speed(\"-1\")).degradeBy(.1).gain(.45),\n  s(\"bd(5,16)\").gain(.45),\n  s(\"hh(7,16)\").speed(\"<1 .5 2 -1>\").degradeBy(.25).gain(.12)\n)",
+      "technicalChecklist": [
+        "Le code commence par setcpm(BPM/4).",
+        "Chaque couche a un rôle identifiable.",
+        "Les samples externes sont déclarés avant leur utilisation.",
+        "Le résultat reste lisible malgré les variations."
+      ]
     }
   ],
   "glossary": [
@@ -2041,6 +2514,38 @@ window.COURSE = {
       "title": "Live coder",
       "description": "Terminer au moins quarante leçons.",
       "rule": "completed >= 40"
+    }
+  ],
+  "sources": [
+    {
+      "id": "docs_samples",
+      "label": "Strudel Samples",
+      "note": "Samples par défaut, lazy loading, banques de sons et chargement GitHub."
+    },
+    {
+      "id": "docs_cycles",
+      "label": "Strudel Cycles and BPM",
+      "note": "Différence entre BPM, CPS, CPM et formule setcpm(bpm/bpc)."
+    },
+    {
+      "id": "docs_time",
+      "label": "Strudel Time Modifiers",
+      "note": "slow, fast, euclid et rotations rythmiques."
+    },
+    {
+      "id": "docs_random",
+      "label": "Strudel Random Modifiers",
+      "note": "degradeBy, sometimes, choose, wchoose et variantes probabilistes."
+    },
+    {
+      "id": "docs_conditions",
+      "label": "Strudel Conditional Modifiers",
+      "note": "lastOf, when, chunk, mask, pick et transformations conditionnelles."
+    },
+    {
+      "id": "docs_synths",
+      "label": "Strudel Synths",
+      "note": "Formes d’onde, bruit, synthèse et paramètres de timbre."
     }
   ]
 };

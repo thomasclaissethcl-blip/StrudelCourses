@@ -328,9 +328,10 @@
         </section>
         <section>
           <h3>Zone de pratique</h3>
-          <p class="muted">Modifiez le code, copiez-le ou chargez-le dans Strudel. Le REPL externe est utilisé pour l'audio.</p>
+          <p class="muted">Modifiez le code, copiez-le ou chargez-le dans Strudel. Le bouton charge le code dans Strudel. Lancez ensuite la lecture dans le REPL intégré ou ouvrez l’onglet complet.</p>
           <label class="field-label" for="lessonCode">Code de travail</label>
           <textarea id="lessonCode" class="code-editor" spellcheck="false">${escapeHtml(draft)}</textarea>
+          <div id="codeDiagnostics" class="diagnostic-box" aria-live="polite"></div>
           <div class="button-row">
             <button id="copyLessonCode">Copier</button>
             <button class="secondary" id="resetLessonCode">Réinitialiser</button>
@@ -344,10 +345,12 @@
 
     const editor = document.getElementById('lessonCode');
     const openLink = document.getElementById('openLessonStrudel');
+    const diagnostics = document.getElementById('codeDiagnostics');
     const updateLink = () => {
       const code = editor.value;
       state.codeDrafts[lesson.id] = code;
       openLink.href = strudelUrl(code);
+      diagnostics.innerHTML = renderCodeDiagnostics(code);
       saveState();
     };
     editor.addEventListener('input', updateLink);
@@ -371,16 +374,47 @@
     document.getElementById('completeLesson').addEventListener('click', () => markComplete(lesson.id));
   }
 
+  function renderCodeDiagnostics(code) {
+    const diagnostics = [];
+    if (/\.cpm\s*\(/.test(code)) {
+      diagnostics.push({ type: 'warn', text: 'Le code utilise .cpm(...). Dans cette version du module, préférez setcpm(BPM/4) en début de code.' });
+    }
+    if (!/\bsetcpm\s*\(/.test(code) && !/\bsetcps\s*\(/.test(code)) {
+      diagnostics.push({ type: 'info', text: 'Aucun tempo explicite détecté. Strudel utilisera son tempo par défaut, ce qui peut brouiller l’exercice.' });
+    }
+    if (/breaks\d+/.test(code) && !/samples\s*\(\s*['"]github:tidalcycles\/dirt-samples/.test(code)) {
+      diagnostics.push({ type: 'warn', text: "Un break de la banque Dirt est utilisé sans ligne samples('github:tidalcycles/dirt-samples')." });
+    }
+    if (/\bs\(\s*['"][^'"]*(bd|sd|hh|cp)/.test(code)) {
+      diagnostics.push({ type: 'info', text: 'Les batteries utilisent des samples. Le premier passage peut être silencieux pendant le chargement.' });
+    }
+    if (!diagnostics.length) {
+      diagnostics.push({ type: 'ok', text: 'Aucun problème technique évident détecté dans ce code.' });
+    }
+    return `<ul>${diagnostics.map(item => `<li class="${item.type}">${escapeHtml(item.text)}</li>`).join('')}</ul>`;
+  }
+
+  function encodeBase64Utf8(text) {
+    const bytes = new TextEncoder().encode(text);
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, i + chunkSize);
+      binary += String.fromCharCode(...chunk);
+    }
+    return btoa(binary);
+  }
+
   function strudelUrl(code) {
-    const encoded = btoa(unescape(encodeURIComponent(code)));
+    const encoded = encodeBase64Utf8(code);
     return `https://strudel.cc/#${encodeURIComponent(encoded)}`;
   }
 
   function loadFrame(holderId, code) {
     const holder = document.getElementById(holderId);
     holder.classList.remove('placeholder');
-    holder.innerHTML = `<iframe title="REPL Strudel" src="${strudelUrl(code)}" loading="lazy" allow="autoplay; clipboard-write"></iframe>`;
-    showToast('REPL Strudel chargé.');
+    holder.innerHTML = `<div class="frame-note">Le code est chargé. Cliquez sur Play dans Strudel. Si un sample ne sonne pas au premier passage, relancez après le chargement.</div><iframe title="REPL Strudel" src="${strudelUrl(code)}" loading="lazy" allow="autoplay; clipboard-read; clipboard-write; fullscreen"></iframe>`;
+    showToast('REPL Strudel chargé. Lancez la lecture dans le REPL.');
   }
 
   async function copyText(text) {
@@ -406,6 +440,7 @@
           <p>${escapeHtml(project.learningGoal)}</p>
           <p class="muted">${escapeHtml(project.deliverable)}</p>
           <pre class="pre-code">${escapeHtml(project.starterCode)}</pre>
+          ${project.technicalChecklist ? `<ul class="checklist">${project.technicalChecklist.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
           <div class="button-row">
             <button class="secondary copy-project" data-project-id="${project.id}">Copier</button>
             <a class="button-link" target="_blank" rel="noopener" href="${strudelUrl(project.starterCode)}">Ouvrir dans Strudel</a>
@@ -458,6 +493,7 @@
 
   function setupDialogs() {
     const glossaryDialog = document.getElementById('glossaryDialog');
+    const techHelpDialog = document.getElementById('techHelpDialog');
     const workshopDialog = document.getElementById('workshopDialog');
     const glossarySearch = document.getElementById('glossarySearch');
     const workshopCode = document.getElementById('workshopCode');
@@ -469,6 +505,8 @@
       glossarySearch.focus();
     });
     document.getElementById('closeGlossary').addEventListener('click', () => glossaryDialog.close());
+    document.getElementById('openTechHelp').addEventListener('click', () => techHelpDialog.showModal());
+    document.getElementById('closeTechHelp').addEventListener('click', () => techHelpDialog.close());
     glossarySearch.addEventListener('input', () => renderGlossary(glossarySearch.value));
 
     const updateWorkshopLink = () => {
