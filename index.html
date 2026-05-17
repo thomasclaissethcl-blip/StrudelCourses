@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Strudel Lab 1.1</title>
+  <title>Strudel Lab 1.2</title>
   <meta name="description" content="Module micro learning pour apprendre Strudel par la pratique.">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -53,12 +53,12 @@
     </div>
     <div class="content-block">
       <h3>Si vous n’entendez rien</h3>
-      <p>Commencez par la leçon « Tester le moteur audio sans sample ». Si le synthé fonctionne mais pas les batteries, attendez quelques secondes puis relancez la lecture. Les samples peuvent être silencieux au premier passage, car Strudel charge les fichiers audio à la demande.</p>
+      <p>Commencez par la leçon « Tester le moteur audio sans sample ». Si le synthé fonctionne mais pas les batteries, attendez quelques secondes puis relancez la lecture. Les exercices à samples du module commencent par une ligne samples(...). Ne la supprimez pas. Le premier passage peut malgré tout rester silencieux quelques instants, car les fichiers audio sont chargés à la demande.</p>
       <p>Dans le REPL intégré, il faut lancer la lecture avec le bouton Play de Strudel. Le bouton de ce module charge seulement le code dans l’interface Strudel.</p>
     </div>
     <div class="content-block">
       <h3>Samples</h3>
-      <p>Les samples de base comme bd, sd, hh et cp sont disponibles par défaut. Les breaks externes comme breaks125 nécessitent une ligne de chargement, par exemple samples('github:tidalcycles/dirt-samples').</p>
+      <p>Dans ce module, les samples comme bd, sd, hh et cp sont chargés explicitement depuis Dirt-Samples. La ligne à conserver est samples('https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/strudel.json'). Elle évite de dépendre du chargement implicite de la carte de samples du REPL.</p>
     </div>
     <div class="content-block">
       <h3>Tempo</h3>
@@ -67,7 +67,12 @@
     <pre class="pre-code">setcpm(120/4)
 // 120 BPM perçu, 4 temps par cycle
 
-s("bd ~ sd ~").bank("RolandTR808")</pre>
+samples('https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/strudel.json')
+
+setcpm(120/4)
+// 120 BPM perçu, 4 temps par cycle
+
+s("bd ~ sd ~")</pre>
   </dialog>
 
   <dialog id="workshopDialog" class="modal wide">
@@ -76,11 +81,16 @@ s("bd ~ sd ~").bank("RolandTR808")</pre>
       <button class="icon-button" id="closeWorkshop" aria-label="Fermer">×</button>
     </div>
     <p class="muted">Collez un pattern, modifiez-le, puis chargez-le dans le REPL Strudel. L'audio s'exécute dans Strudel, l'application conserve votre code en local.</p>
-    <textarea id="workshopCode" class="code-editor" spellcheck="false">stack(
+    <textarea id="workshopCode" class="code-editor" spellcheck="false">samples('https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/strudel.json')
+
+setcpm(70/4)
+// 70 BPM perçu, 4 temps par cycle
+
+stack(
   s("bd ~ sd ~"),
   s("hh*8").gain(.25),
-  note("c3 eb3 g3 bb3").s("sine").slow(8).room(.8).gain(.25)
-).cpm(70)</textarea>
+  note("[c3,eb3,g3,bb3]").s("sine").slow(8).room(.8).gain(.25)
+)</textarea>
     <div class="button-row">
       <button id="copyWorkshopCode">Copier</button>
       <button id="loadWorkshopCode">Charger dans Strudel</button>

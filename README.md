@@ -1,92 +1,44 @@
-# Strudel Lab 1.1
+# Strudel Lab 1.2
 
-Strudel Lab est un module micro learning statique pour apprendre Strudel par la pratique.
+Module micro learning statique pour apprendre Strudel par la pratique.
 
-## Corrections de la version 1.1
+## Démarrage
 
-Cette version corrige les deux principaux problèmes constatés dans la version 1.0.
+Dézippez le dossier, puis ouvrez `index.html` dans un navigateur moderne.
 
-D'abord, les exemples n'utilisent plus `.cpm(...)`. Les patterns utilisent désormais `setcpm(BPM/4)` quand le cycle est traité comme une mesure de quatre temps. Cette convention évite que les projets finaux soient joués quatre fois trop vite.
+Le module fonctionne localement pour la navigation, les consignes, les corrections, le glossaire, les badges et la progression. L'audio est exécuté dans le REPL Strudel, ouvert dans un iframe ou dans un nouvel onglet.
 
-Ensuite, le module explique explicitement le comportement des samples. Les samples par défaut comme `bd`, `sd`, `hh` et `cp` sont disponibles dans Strudel, mais les fichiers audio sont chargés à la demande. Le premier passage peut donc être silencieux. Le module commence désormais par un test audio synthétique, qui ne dépend pas du chargement de samples.
+## Correction importante de la version 1.2
 
-## Contenu
-
-Le module contient :
-
-- un tronc commun pour les bases de Strudel,
-- un parcours composition générative,
-- un parcours minimaliste,
-- un parcours urban beat,
-- un parcours ambient,
-- un parcours techno, house et trance,
-- un parcours glitch et broken beats,
-- un parcours théorie musicale appliquée,
-- un parcours IDM,
-- des projets finaux,
-- un glossaire,
-- une aide audio et tempo,
-- un atelier libre,
-- une progression locale avec badges.
-
-## Utilisation
-
-Ouvrez `index.html` dans un navigateur moderne.
-
-Le module fonctionne localement pour la navigation, les consignes, les corrections, les badges et la sauvegarde de progression. Pour écouter le code, utilisez les boutons `Charger dans Strudel` ou `Ouvrir dans un onglet`. Ces boutons chargent le REPL Strudel officiel à partir du code présent dans la zone de pratique.
-
-Dans le REPL Strudel, il faut ensuite lancer la lecture avec le bouton Play. Si un sample ne sonne pas immédiatement, attendez quelques secondes puis relancez la lecture.
-
-## Convention de tempo
-
-Strudel raisonne en cycles par minute. Dans ce module, la plupart des exercices considèrent qu'un cycle correspond à quatre temps. La règle pratique est donc :
+Tous les exercices qui utilisent des samples déclarent explicitement la banque Dirt-Samples avec :
 
 ```js
-setcpm(BPM / 4)
+samples('https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/strudel.json')
 ```
 
-Exemple pour un ressenti à 120 BPM :
+Cette ligne ne doit pas être supprimée dans les exercices rythmiques. Elle évite de dépendre du comportement implicite du REPL Strudel pour les samples par défaut.
+
+Strudel charge ensuite les fichiers audio à la demande. Il peut donc rester un court silence au premier passage, le temps que le navigateur télécharge le sample. Relancez la lecture après quelques secondes si nécessaire.
+
+## Tempo
+
+Le module utilise la convention suivante : lorsqu'un cycle représente quatre temps, un tempo de 120 BPM s'écrit :
 
 ```js
 setcpm(120/4)
-
-s("bd ~ sd ~").bank("RolandTR808")
 ```
 
-## Samples
-
-Les samples de base sont disponibles par défaut dans Strudel. Les banques explicites comme `RolandTR808` ou `RolandTR909` sont utilisées dans plusieurs exercices pour stabiliser l'écoute.
-
-Les breaks issus de Dirt nécessitent cette déclaration :
-
-```js
-samples('github:tidalcycles/dirt-samples')
-```
+Cela évite de confondre BPM perçu et cycles par minute.
 
 ## Fichiers
 
-- `index.html` contient la structure de l'application.
-- `style.css` contient l'interface responsive.
-- `app.js` gère la navigation, la progression, les badges, le glossaire, l'atelier, l'aide et l'intégration Strudel par URL.
-- `lessons.js` contient les branches, les leçons, les corrections, les projets et le glossaire.
-- `README.md` décrit le module.
+- `index.html` : structure de l'application.
+- `style.css` : interface visuelle.
+- `lessons.js` : contenus pédagogiques, exercices, corrections, projets et glossaire.
+- `app.js` : navigation, progression, diagnostics et liens vers Strudel.
 
-## Sauvegarde
+## Usage pédagogique
 
-La progression est sauvegardée dans `localStorage`. Elle reste liée au navigateur utilisé. Le bouton `Réinitialiser` efface cette progression locale.
+La progression part du tronc commun, puis ouvre vers composition générative, minimalisme, urban beat, ambient, techno, glitch, théorie et IDM.
 
-## Intégration Strudel
-
-Cette version utilise des liens longs vers le REPL Strudel. Le code est encodé dans l'URL et chargé dans le REPL externe. Cette approche évite d'imposer un serveur ou un bundler.
-
-## Licence et vigilance
-
-Strudel est un logiciel libre sous licence AGPL-3.0. Si vous publiez ce module avec une intégration Strudel, vérifiez les obligations applicables à votre mode de diffusion. Cette version ne modifie pas Strudel. Elle charge le REPL externe et fournit des contenus pédagogiques autour de Strudel.
-
-## Limites connues
-
-L'audio dépend du navigateur et du REPL Strudel externe. Certains navigateurs bloquent l'audio tant que l'utilisateur n'a pas interagi avec la page. Les exercices qui chargent des samples distants nécessitent une connexion internet.
-
-## Version
-
-Version 1.1, révision technique et pédagogique de la première version complète.
+Chaque leçon contient un objectif, une notion, une consigne, deux indices, une correction, un point d'écoute et une synthèse.

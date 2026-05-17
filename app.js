@@ -1,6 +1,7 @@
 (() => {
   const COURSE = window.COURSE;
-  const STORAGE_KEY = 'strudelLabV1State';
+  const STORAGE_KEY = 'strudelLabV12State';
+  const REQUIRED_SAMPLE_SETUP = "samples('https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/strudel.json')";
   const view = document.getElementById('view');
   const branchNav = document.getElementById('branchNav');
   const globalProgressLabel = document.getElementById('globalProgressLabel');
@@ -382,11 +383,19 @@
     if (!/\bsetcpm\s*\(/.test(code) && !/\bsetcps\s*\(/.test(code)) {
       diagnostics.push({ type: 'info', text: 'Aucun tempo explicite détecté. Strudel utilisera son tempo par défaut, ce qui peut brouiller l’exercice.' });
     }
-    if (/breaks\d+/.test(code) && !/samples\s*\(\s*['"]github:tidalcycles\/dirt-samples/.test(code)) {
-      diagnostics.push({ type: 'warn', text: "Un break de la banque Dirt est utilisé sans ligne samples('github:tidalcycles/dirt-samples')." });
+    const hasDirtSamples = /\bs\(\s*['"][^'"]*(bd|sd|hh|cp|oh|breaks125|breaks152|breaks157|breaks165|amencutup|glitch)/.test(code);
+    const hasExplicitSampleSetup = code.includes(REQUIRED_SAMPLE_SETUP) || /samples\s*\(\s*['"]github:tidalcycles\/dirt-samples/.test(code);
+    if (hasDirtSamples && !hasExplicitSampleSetup) {
+      diagnostics.push({ type: 'warn', text: 'Ce code utilise des samples, mais la ligne de chargement Dirt-Samples est absente. Ajoutez samples('https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/strudel.json') en première ligne.' });
     }
-    if (/\bs\(\s*['"][^'"]*(bd|sd|hh|cp)/.test(code)) {
-      diagnostics.push({ type: 'info', text: 'Les batteries utilisent des samples. Le premier passage peut être silencieux pendant le chargement.' });
+    if (/\.bank\s*\(/.test(code)) {
+      diagnostics.push({ type: 'warn', text: 'Le module n’utilise plus .bank(...) dans les exercices de base, afin de s’appuyer sur la banque Dirt-Samples explicitement chargée.' });
+    }
+    if (hasDirtSamples && hasExplicitSampleSetup) {
+      diagnostics.push({ type: 'ok', text: 'La banque Dirt-Samples est déclarée explicitement. Gardez cette ligne pour rendre le pattern audible.' });
+    }
+    if (hasDirtSamples) {
+      diagnostics.push({ type: 'info', text: 'Les samples sont téléchargés à la demande. Le premier passage peut rester silencieux quelques instants, puis sonner après relance.' });
     }
     if (!diagnostics.length) {
       diagnostics.push({ type: 'ok', text: 'Aucun problème technique évident détecté dans ce code.' });
@@ -413,7 +422,7 @@
   function loadFrame(holderId, code) {
     const holder = document.getElementById(holderId);
     holder.classList.remove('placeholder');
-    holder.innerHTML = `<div class="frame-note">Le code est chargé. Cliquez sur Play dans Strudel. Si un sample ne sonne pas au premier passage, relancez après le chargement.</div><iframe title="REPL Strudel" src="${strudelUrl(code)}" loading="lazy" allow="autoplay; clipboard-read; clipboard-write; fullscreen"></iframe>`;
+    holder.innerHTML = `<div class="frame-note">Le code est chargé. Cliquez sur Play dans Strudel. Les exemples à samples contiennent une ligne samples(...). Gardez-la et relancez si le premier passage est silencieux.</div><iframe title="REPL Strudel" src="${strudelUrl(code)}" loading="lazy" allow="autoplay; clipboard-read; clipboard-write; fullscreen"></iframe>`;
     showToast('REPL Strudel chargé. Lancez la lecture dans le REPL.');
   }
 
