@@ -1,4 +1,4 @@
-# Strudel Lab 1.2
+# Strudel Lab 1.3
 
 Module micro learning statique pour apprendre Strudel par la pratique.
 
@@ -8,7 +8,7 @@ Dézippez le dossier, puis ouvrez `index.html` dans un navigateur moderne.
 
 Le module fonctionne localement pour la navigation, les consignes, les corrections, le glossaire, les badges et la progression. L'audio est exécuté dans le REPL Strudel, ouvert dans un iframe ou dans un nouvel onglet.
 
-## Correction importante de la version 1.2
+## Correction importante de la version 1.3
 
 Tous les exercices qui utilisent des samples déclarent explicitement la banque Dirt-Samples avec :
 
@@ -42,3 +42,8 @@ Cela évite de confondre BPM perçu et cycles par minute.
 La progression part du tronc commun, puis ouvre vers composition générative, minimalisme, urban beat, ambient, techno, glitch, théorie et IDM.
 
 Chaque leçon contient un objectif, une notion, une consigne, deux indices, une correction, un point d'écoute et une synthèse.
+
+
+## Correctifs 1.3
+
+Cette version corrige une erreur JavaScript qui empêchait l’affichage des leçons dans Firefox. Elle rend aussi le premier test audio plus immédiatement audible et recommande l’ouverture dans un onglet Strudel complet lorsque l’audio d’une iframe est bloqué par le navigateur.

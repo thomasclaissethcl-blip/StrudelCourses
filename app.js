@@ -1,6 +1,6 @@
 (() => {
   const COURSE = window.COURSE;
-  const STORAGE_KEY = 'strudelLabV12State';
+  const STORAGE_KEY = 'strudelLabV13State';
   const REQUIRED_SAMPLE_SETUP = "samples('https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/strudel.json')";
   const view = document.getElementById('view');
   const branchNav = document.getElementById('branchNav');
@@ -329,15 +329,15 @@
         </section>
         <section>
           <h3>Zone de pratique</h3>
-          <p class="muted">Modifiez le code, copiez-le ou chargez-le dans Strudel. Le bouton charge le code dans Strudel. Lancez ensuite la lecture dans le REPL intégré ou ouvrez l’onglet complet.</p>
+          <p class="muted">Modifiez le code, copiez-le ou ouvrez-le dans Strudel. Sur Firefox, l’onglet complet est plus fiable que l’iframe intégrée pour l’audio.</p>
           <label class="field-label" for="lessonCode">Code de travail</label>
           <textarea id="lessonCode" class="code-editor" spellcheck="false">${escapeHtml(draft)}</textarea>
           <div id="codeDiagnostics" class="diagnostic-box" aria-live="polite"></div>
           <div class="button-row">
             <button id="copyLessonCode">Copier</button>
             <button class="secondary" id="resetLessonCode">Réinitialiser</button>
-            <button id="loadLessonCode">Charger dans Strudel</button>
-            <a id="openLessonStrudel" class="button-link" target="_blank" rel="noopener">Ouvrir dans un onglet</a>
+            <a id="openLessonStrudel" class="button-link primary-link" target="_blank" rel="noopener">Ouvrir dans Strudel</a>
+            <button id="loadLessonCode" class="secondary">Charger ici</button>
           </div>
           <div id="lessonFrameHolder" class="frame-holder placeholder"><p>Chargez le code pour ouvrir le REPL Strudel intégré.</p></div>
         </section>
@@ -386,7 +386,7 @@
     const hasDirtSamples = /\bs\(\s*['"][^'"]*(bd|sd|hh|cp|oh|breaks125|breaks152|breaks157|breaks165|amencutup|glitch)/.test(code);
     const hasExplicitSampleSetup = code.includes(REQUIRED_SAMPLE_SETUP) || /samples\s*\(\s*['"]github:tidalcycles\/dirt-samples/.test(code);
     if (hasDirtSamples && !hasExplicitSampleSetup) {
-      diagnostics.push({ type: 'warn', text: 'Ce code utilise des samples, mais la ligne de chargement Dirt-Samples est absente. Ajoutez samples('https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/strudel.json') en première ligne.' });
+      diagnostics.push({ type: 'warn', text: `Ce code utilise des samples, mais la ligne de chargement Dirt-Samples est absente. Ajoutez ${REQUIRED_SAMPLE_SETUP} en première ligne.` });
     }
     if (/\.bank\s*\(/.test(code)) {
       diagnostics.push({ type: 'warn', text: 'Le module n’utilise plus .bank(...) dans les exercices de base, afin de s’appuyer sur la banque Dirt-Samples explicitement chargée.' });
@@ -422,7 +422,7 @@
   function loadFrame(holderId, code) {
     const holder = document.getElementById(holderId);
     holder.classList.remove('placeholder');
-    holder.innerHTML = `<div class="frame-note">Le code est chargé. Cliquez sur Play dans Strudel. Les exemples à samples contiennent une ligne samples(...). Gardez-la et relancez si le premier passage est silencieux.</div><iframe title="REPL Strudel" src="${strudelUrl(code)}" loading="lazy" allow="autoplay; clipboard-read; clipboard-write; fullscreen"></iframe>`;
+    holder.innerHTML = `<div class="frame-note">Le code est chargé. Cliquez sur Play dans Strudel. Sur Firefox, utilisez l’onglet complet si l’iframe reste muette. Les exemples à samples contiennent une ligne samples(...), à conserver.</div><iframe title="REPL Strudel" src="${strudelUrl(code)}" loading="lazy" allow="autoplay; clipboard-read; clipboard-write; fullscreen" referrerpolicy="no-referrer"></iframe>`;
     showToast('REPL Strudel chargé. Lancez la lecture dans le REPL.');
   }
 

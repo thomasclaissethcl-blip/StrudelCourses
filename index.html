@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Strudel Lab 1.2</title>
+  <title>Strudel Lab 1.3</title>
   <meta name="description" content="Module micro learning pour apprendre Strudel par la pratique.">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -54,7 +54,7 @@
     <div class="content-block">
       <h3>Si vous n’entendez rien</h3>
       <p>Commencez par la leçon « Tester le moteur audio sans sample ». Si le synthé fonctionne mais pas les batteries, attendez quelques secondes puis relancez la lecture. Les exercices à samples du module commencent par une ligne samples(...). Ne la supprimez pas. Le premier passage peut malgré tout rester silencieux quelques instants, car les fichiers audio sont chargés à la demande.</p>
-      <p>Dans le REPL intégré, il faut lancer la lecture avec le bouton Play de Strudel. Le bouton de ce module charge seulement le code dans l’interface Strudel.</p>
+      <p>Dans le REPL intégré, il faut lancer la lecture avec le bouton Play de Strudel. Le bouton de ce module charge seulement le code dans l’interface Strudel. Sur Firefox, utilisez de préférence « Ouvrir dans un onglet » si l’iframe ne démarre pas l’audio.</p>
     </div>
     <div class="content-block">
       <h3>Samples</h3>
@@ -64,10 +64,7 @@
       <h3>Tempo</h3>
       <p>Strudel utilise des cycles par minute. Dans ce module, quand un cycle correspond à quatre temps, un tempo de 120 BPM s’écrit setcpm(120/4). Écrire setcpm(120) avec quatre temps dans le cycle donne une sensation quatre fois trop rapide.</p>
     </div>
-    <pre class="pre-code">setcpm(120/4)
-// 120 BPM perçu, 4 temps par cycle
-
-samples('https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/strudel.json')
+    <pre class="pre-code">samples('https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/strudel.json')
 
 setcpm(120/4)
 // 120 BPM perçu, 4 temps par cycle
@@ -97,7 +94,7 @@ stack(
       <a id="openWorkshopStrudel" class="button-link" target="_blank" rel="noopener">Ouvrir dans un onglet</a>
     </div>
     <div id="workshopFrameHolder" class="frame-holder placeholder">
-      <p>Le REPL Strudel sera chargé ici après action sur le bouton.</p>
+      <p>Le REPL Strudel sera chargé ici après action sur le bouton. Sur Firefox, privilégiez l’ouverture dans un onglet complet si l’iframe reste muette.</p>
     </div>
   </dialog>
 
