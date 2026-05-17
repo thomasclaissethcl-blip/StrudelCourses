@@ -358,3 +358,35 @@ button:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow
   padding: .75rem .9rem .75rem 1.6rem;
   background: #fff;
 }
+
+.syntax-note,
+.listening-question,
+.technical-reminder,
+.challenge-block,
+.self-check,
+.method-block {
+  background: #f8fbff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: .9rem;
+}
+.syntax-note { border-left: 4px solid #3157d5; }
+.listening-question { border-left: 4px solid #0d9488; }
+.technical-reminder { border-left: 4px solid #9a5b00; background: #fffaf0; }
+.challenge-block { border-left: 4px solid #6d5bd0; }
+.method-list,
+.checklist {
+  margin: .4rem 0 0;
+  padding-left: 1.25rem;
+}
+.method-list li,
+.checklist li {
+  margin: .35rem 0;
+}
+.project-card h4 {
+  margin: 0 0 .35rem;
+  font-size: 1rem;
+}
+.lesson-layout .content-block p {
+  max-width: 74ch;
+}

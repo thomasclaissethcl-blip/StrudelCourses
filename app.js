@@ -1,6 +1,6 @@
 (() => {
   const COURSE = window.COURSE;
-  const STORAGE_KEY = 'strudelLabV13State';
+  const STORAGE_KEY = 'strudelLabV14State';
   const REQUIRED_SAMPLE_SETUP = "samples('https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/strudel.json')";
   const view = document.getElementById('view');
   const branchNav = document.getElementById('branchNav');
@@ -57,6 +57,17 @@
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#039;');
+  }
+
+  function renderList(items, className = '') {
+    if (!Array.isArray(items) || !items.length) return '';
+    const cls = className ? ` class="${className}"` : '';
+    return `<ol${cls}>${items.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ol>`;
+  }
+
+  function renderContentBlock(title, value, extraClass = '') {
+    if (!value) return '';
+    return `<div class="content-block ${extraClass}"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(value)}</p></div>`;
   }
 
   function lessonById(id) {
@@ -284,22 +295,20 @@
             </div>
           </div>
 
-          <div class="content-block">
-            <h3>Objectif</h3>
-            <p>${escapeHtml(lesson.learningGoal)}</p>
-          </div>
-          <div class="content-block">
-            <h3>Notion</h3>
-            <p>${escapeHtml(lesson.concept)}</p>
-          </div>
+          ${renderContentBlock('Objectif', lesson.learningGoal)}
+          ${renderContentBlock('Comprendre', lesson.concept)}
+          ${renderContentBlock('Pourquoi c’est utile', lesson.whyItMatters)}
+          ${renderContentBlock('Repère syntaxique', lesson.syntaxFocus, 'syntax-note')}
+          ${lesson.guidedSteps ? `<div class="content-block method-block"><h3>Méthode de pratique</h3>${renderList(lesson.guidedSteps, 'method-list')}</div>` : ''}
+
           <div class="content-block callout">
             <h3>Consigne</h3>
             <p>${escapeHtml(lesson.task)}</p>
           </div>
-          <div class="content-block">
-            <h3>Ce qu'il faut écouter</h3>
-            <p>${escapeHtml(lesson.whatToListenFor)}</p>
-          </div>
+          ${renderContentBlock('Ce qu’il faut écouter', lesson.whatToListenFor)}
+          ${renderContentBlock('Question d’écoute', lesson.listeningQuestion, 'listening-question')}
+          ${renderContentBlock('Rappel technique', lesson.technicalReminder, 'technical-reminder')}
+
           <details class="details-box">
             <summary>Indice 1</summary>
             <div class="details-content"><p>${escapeHtml(lesson.hintLevel1)}</p></div>
@@ -312,14 +321,16 @@
             <summary>Correction</summary>
             <div class="details-content"><pre class="pre-code">${escapeHtml(lesson.solution)}</pre><button class="secondary" id="useSolution">Utiliser cette correction</button></div>
           </details>
+          ${renderContentBlock('Défi optionnel', lesson.microChallenge, 'challenge-block')}
           <div class="content-block callout warning">
             <h3>Erreur fréquente</h3>
             <p>${escapeHtml(lesson.commonMistake)}</p>
           </div>
-          <div class="content-block">
-            <h3>À retenir</h3>
-            <p>${escapeHtml(lesson.summary)}</p>
+          <div class="content-block self-check">
+            <h3>Auto-vérification</h3>
+            ${renderList(lesson.selfCheck, 'checklist')}
           </div>
+          ${renderContentBlock('À retenir', lesson.summary)}
           <div class="lesson-nav">
             <button class="secondary" id="backToBranch">Retour au parcours</button>
             ${prev ? `<button class="secondary" id="prevLesson">Leçon précédente</button>` : ''}
@@ -448,8 +459,11 @@
           <h3>${escapeHtml(project.title)}</h3>
           <p>${escapeHtml(project.learningGoal)}</p>
           <p class="muted">${escapeHtml(project.deliverable)}</p>
+          ${project.compositionBrief ? `<div class="content-block"><h4>Intention</h4><p>${escapeHtml(project.compositionBrief)}</p></div>` : ''}
+          ${project.guidedSteps ? `<div class="content-block"><h4>Méthode</h4>${renderList(project.guidedSteps, 'method-list')}</div>` : ''}
+          ${project.listeningCriteria ? `<div class="content-block"><h4>Critères d’écoute</h4>${renderList(project.listeningCriteria, 'checklist')}</div>` : ''}
           <pre class="pre-code">${escapeHtml(project.starterCode)}</pre>
-          ${project.technicalChecklist ? `<ul class="checklist">${project.technicalChecklist.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
+          ${project.technicalChecklist ? `<div class="content-block"><h4>Checklist technique</h4>${renderList(project.technicalChecklist, 'checklist')}</div>` : ''}
           <div class="button-row">
             <button class="secondary copy-project" data-project-id="${project.id}">Copier</button>
             <a class="button-link" target="_blank" rel="noopener" href="${strudelUrl(project.starterCode)}">Ouvrir dans Strudel</a>
