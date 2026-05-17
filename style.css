@@ -325,3 +325,36 @@ button:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow
   button, .button-link { width: 100%; }
   .lesson-item { grid-template-columns: 1fr; }
 }
+
+.diagnostic-box {
+  margin: .75rem 0 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: #fff;
+  padding: .75rem .9rem;
+}
+.diagnostic-box ul,
+.checklist {
+  margin: 0;
+  padding-left: 1.15rem;
+}
+.diagnostic-box li,
+.checklist li {
+  margin: .25rem 0;
+}
+.diagnostic-box li.warn { color: #8a4b00; font-weight: 800; }
+.diagnostic-box li.info { color: #35415a; }
+.diagnostic-box li.ok { color: #24633b; font-weight: 800; }
+.frame-note {
+  padding: .65rem .85rem;
+  background: var(--panel-alt);
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-weight: 800;
+}
+.checklist {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: .75rem .9rem .75rem 1.6rem;
+  background: #fff;
+}
